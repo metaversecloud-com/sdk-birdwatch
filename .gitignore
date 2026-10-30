@@ -1,0 +1,36 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+build
+build-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+.env
+
+# custom
+server/dist
+
+# tofu (tofu/ is applied remotely by Terrakube; only source + lock are tracked)
+.terraform/
+.terraform.nosync/
+*.tfstate
+*.tfstate.*
+crash.log
