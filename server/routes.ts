@@ -1,15 +1,24 @@
 import express from "express";
-import { handleGetGameState } from "./controllers/index.js";
+import {
+  handleGetGameState,
+  handleStartSighting,
+  handleResolveSighting,
+  handleGetCooldown,
+  handleUpdateAdminSettings,
+  handleResetBirdCount,
+  handleResetLeaderboard,
+  handleMysteryGuess,
+} from "./controllers/index.js";
 import { getVersion } from "@utils/getVersion.js";
 
 const router = express.Router();
 const SERVER_START_DATE = new Date();
 
-router.get("/", (req, res) => {
-  res.json({ message: "Hello from server!" });
+router.get("/", (_req, res) => {
+  res.json({ message: "Birdwatch server up" });
 });
 
-router.get("/system/health", (req, res) => {
+router.get("/system/health", (_req, res) => {
   return res.json({
     appVersion: getVersion(),
     status: "OK",
@@ -20,11 +29,17 @@ router.get("/system/health", (req, res) => {
       NODE_ENV: process.env.NODE_ENV,
       INSTANCE_DOMAIN: process.env.INSTANCE_DOMAIN,
       INTERACTIVE_KEY: process.env.INTERACTIVE_KEY,
-      S3_BUCKET: process.env.S3_BUCKET,
     },
   });
 });
 
 router.get("/game-state", handleGetGameState);
+router.post("/sightings/start", handleStartSighting);
+router.post("/sightings/resolve", handleResolveSighting);
+router.get("/cooldown/:assetId", handleGetCooldown);
+router.post("/admin/settings", handleUpdateAdminSettings);
+router.post("/admin/reset-bird-count", handleResetBirdCount);
+router.post("/admin/reset-leaderboard", handleResetLeaderboard);
+router.post("/mystery/guess", handleMysteryGuess);
 
 export default router;

@@ -12,16 +12,18 @@ const globalReducer = (state: InitialState, action: ActionType) => {
       return {
         ...state,
         isAdmin: payload.isAdmin,
-        visitorData: payload.visitorData,
-        droppedAsset: payload.droppedAsset,
+        gameState: payload.gameState,
+        visitorInventory: payload.visitorInventory,
+        visitorBirdItems: payload.visitorBirdItems,
+        profileId: payload.profileId,
+        displayName: payload.displayName,
         error: "",
       };
     case SET_ERROR:
       return {
         ...state,
-        error: payload.error,
+        error: payload.error || "",
       };
-
     default: {
       throw new Error(`Unhandled action type: ${type}`);
     }

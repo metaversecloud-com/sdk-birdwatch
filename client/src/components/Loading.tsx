@@ -4,7 +4,7 @@ export const Loading = () => {
       <img
         alt="Loading"
         src="https://sdk-style.s3.amazonaws.com/icons/loading.svg"
-        style={{ margin: "auto", height: 50 }}
+        className="mx-auto h-[50px]"
       />
     </div>
   );
