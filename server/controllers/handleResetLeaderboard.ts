@@ -9,6 +9,7 @@ export const handleResetLeaderboard = async (req: Request, res: Response) => {
 
     const world = await getBirdwatchWorld(credentials);
     await world.updateDataObject({ leaderboard: {} }, {});
+
     return res.json({ success: true, data: { leaderboard: {} } });
   } catch (error) {
     return errorHandler({

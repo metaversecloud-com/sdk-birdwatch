@@ -58,26 +58,29 @@ export const handleStartSighting = async (req: Request, res: Response) => {
     const legendaryUsage = perScene.legendaryAlertUsage;
     const activeAlert = collectionState?.activeLegendaryAlert;
     const alertFreshFor = (fired: number) => now - fired < 5 * 60 * 1000;
-    const isLegendarySkip =
-      Boolean(
-        activeAlert &&
-          activeAlert.spot === spotMeta.spot &&
-          alertFreshFor(activeAlert.firedAt) &&
-          (!legendaryUsage ||
-            legendaryUsage.alertId !== activeAlert.alertId ||
-            !legendaryUsage.usedAssetIds.includes(assetId)),
-      );
+    const isLegendarySkip = Boolean(
+      activeAlert &&
+        activeAlert.spot === spotMeta.spot &&
+        alertFreshFor(activeAlert.firedAt) &&
+        (!legendaryUsage ||
+          legendaryUsage.alertId !== activeAlert.alertId ||
+          !legendaryUsage.usedAssetIds.includes(assetId)),
+    );
 
     const data = getCollectionData(spotMeta.collectionId);
     if (!data) return res.status(400).json({ success: false, message: "Unknown collection." });
 
     const rightBird = isLegendarySkip
       ? data.birdsById[activeAlert!.birdId]
-      : rollBirdForSpot(spotMeta.collectionId, spotMeta.spot, collectionState?.milestones || {
-          rareBoostUnlocked: false,
-          legendaryBoostUnlocked: false,
-          championBadgeUnlocked: false,
-        });
+      : rollBirdForSpot(
+          spotMeta.collectionId,
+          spotMeta.spot,
+          collectionState?.milestones || {
+            rareBoostUnlocked: false,
+            legendaryBoostUnlocked: false,
+            championBadgeUnlocked: false,
+          },
+        );
 
     const [a, b, c] = pickChoices(spotMeta.collectionId, spotMeta.spot, rightBird);
 

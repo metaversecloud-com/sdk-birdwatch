@@ -40,7 +40,6 @@ export const handleMysteryGuess = async (req: Request, res: Response) => {
   try {
     const credentials = getCredentials(req.query);
     const { urlSlug, sceneDropId, profileId } = credentials;
-    const forceRefreshInventory = req.query.forceRefreshInventory === "true";
     const { collectionId, pickedBirdId } = (req.body || {}) as GuessBody;
 
     if (!collectionId || !pickedBirdId) {
@@ -102,20 +101,17 @@ export const handleMysteryGuess = async (req: Request, res: Response) => {
       },
     );
 
-    // Badges on solve.
-    const grantedBadges: string[] = [];
-    const tryAward = async (name: string) => {
-      const r = await awardBadge(credentials, profileId, name, forceRefreshInventory).catch(() => ({
-        granted: false,
-      }));
-      if (r.granted) grantedBadges.push(name);
+    // Badges on solve. Fire-and-forget: the next /game-state?forceRefreshInventory=true
+    // picks up any newly-granted badge, so we don't block the guess response on it.
+    const tryAward = (name: string) => {
+      awardBadge(credentials, profileId, name).catch(() => undefined);
     };
     if (isCorrect) {
-      if (nextState.solvedTotal >= 1) await tryAward(MYSTERY_BADGES.mysterySolved);
-      if (nextState.solvedTotal >= 5) await tryAward(MYSTERY_BADGES.sharpEye);
-      if (nextState.solvedTotal >= 15) await tryAward(MYSTERY_BADGES.birdDetective);
-      if (nextState.solvedTotal >= 30) await tryAward(MYSTERY_BADGES.mysteryMaster);
-      if (nextState.firstTryTotal >= 1) await tryAward(MYSTERY_BADGES.firstTry);
+      if (nextState.solvedTotal >= 1) tryAward(MYSTERY_BADGES.mysterySolved);
+      if (nextState.solvedTotal >= 5) tryAward(MYSTERY_BADGES.sharpEye);
+      if (nextState.solvedTotal >= 15) tryAward(MYSTERY_BADGES.birdDetective);
+      if (nextState.solvedTotal >= 30) tryAward(MYSTERY_BADGES.mysteryMaster);
+      if (nextState.firstTryTotal >= 1) tryAward(MYSTERY_BADGES.firstTry);
     }
 
     return res.json({
@@ -125,7 +121,6 @@ export const handleMysteryGuess = async (req: Request, res: Response) => {
         answerBirdId: puzzle.answerId,
         answerSpot: puzzle.answerSpot,
         guessesLeft: Math.max(0, 2 - guessesUsed),
-        grantedBadges,
         state: nextState,
       },
     });

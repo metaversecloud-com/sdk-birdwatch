@@ -1,10 +1,5 @@
 import { Request, Response } from "express";
-import {
-  errorHandler,
-  getBirdwatchVisitor,
-  getBirdwatchWorld,
-  getCredentials,
-} from "@utils/index.js";
+import { errorHandler, getBirdwatchVisitor, getBirdwatchWorld, getCredentials } from "@utils/index.js";
 import type { AdminSettings, IdentificationMode, CooldownOption } from "@shared/types/index.js";
 import type { DataObjectPatch } from "../types/DroppedAssetTypes.js";
 import { COOLDOWN_OPTIONS } from "@shared/types/index.js";
@@ -22,11 +17,13 @@ export const handleUpdateAdminSettings = async (req: Request, res: Response) => 
     const body = (req.body || {}) as Partial<AdminSettings>;
     const updates: DataObjectPatch = {};
     if (body.identificationMode !== undefined) {
-      if (!isMode(body.identificationMode)) return res.status(400).json({ success: false, message: "Invalid identificationMode" });
+      if (!isMode(body.identificationMode))
+        return res.status(400).json({ success: false, message: "Invalid identificationMode" });
       updates["adminSettings.identificationMode"] = body.identificationMode;
     }
     if (body.cooldownSeconds !== undefined) {
-      if (!isCooldown(body.cooldownSeconds)) return res.status(400).json({ success: false, message: "Invalid cooldownSeconds" });
+      if (!isCooldown(body.cooldownSeconds))
+        return res.status(400).json({ success: false, message: "Invalid cooldownSeconds" });
       updates["adminSettings.cooldownSeconds"] = body.cooldownSeconds;
     }
     if (body.allAboutBirdsLinksEnabled !== undefined) {
@@ -41,6 +38,7 @@ export const handleUpdateAdminSettings = async (req: Request, res: Response) => 
     const world = await getBirdwatchWorld(credentials);
     await world.updateDataObject(updates, {});
     const adminSettings = world.dataObject.adminSettings as AdminSettings;
+
     return res.json({ success: true, data: { adminSettings } });
   } catch (error) {
     return errorHandler({

@@ -34,4 +34,14 @@ export const collection: Collection = {
   id: "north_american_winter_birds",
   name: "North American Winter Birds",
   species: birds,
+  badges: {
+    complete: "North American Winter Birds Complete",
+    champion: "North American Winter Champion Birder",
+    spots: {
+      feeder: "Winter Feeder Birds",
+      pine_woods: "Winter Pine Woods Birds",
+      frozen_pond: "Winter Frozen Pond Birds",
+      berry_bushes: "Winter Berry Bushes Birds",
+    },
+  },
 };

@@ -9,11 +9,11 @@ export const CountDescription = ({
   speciesCount?: number;
 }) => {
   if (outcome !== "new_species") {
-    return <p className="bw-subtitle m-0">Already in your Field Guide</p>;
+    return <p className="text-sm">Already in your Field Guide</p>;
   }
   const total = nawbCollection.species.length;
   return (
-    <p className="bw-subtitle m-0">
+    <p className="text-sm">
       Added to your Field Guide · {speciesCount ?? "?"} of {total}
     </p>
   );

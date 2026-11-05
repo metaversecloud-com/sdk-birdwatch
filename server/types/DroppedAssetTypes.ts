@@ -1,10 +1,5 @@
 import { DroppedAssetInterface, VisitorInterface, WorldInterface, InventoryItemInterface } from "@rtsdk/topia";
-import type {
-  AdminSettings,
-  BirdwatchWorldState,
-  SpotKey,
-  VisitorPerScene,
-} from "@shared/types/index.js";
+import type { AdminSettings, WorldState, SpotKey, VisitorPerScene } from "@shared/types/index.js";
 
 export interface IKeyAsset extends DroppedAssetInterface {
   dataObject: { collectionId?: string };
@@ -21,8 +16,8 @@ export interface ITrophyAsset extends DroppedAssetInterface {
 export type IBirdwatchAsset = IKeyAsset | ISpotAsset | ITrophyAsset;
 
 export interface IBirdwatchWorld extends WorldInterface {
-  // Flat: no `birdwatch` wrapper. BirdwatchWorldState lives at the top level.
-  dataObject: Partial<BirdwatchWorldState>;
+  // Flat: no `birdwatch` wrapper. WorldState lives at the top level.
+  dataObject: Partial<WorldState>;
 }
 
 export interface IBirdwatchVisitor extends VisitorInterface {

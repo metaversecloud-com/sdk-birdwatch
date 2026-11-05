@@ -7,10 +7,10 @@ export const AdminIconButton = ({
 }) => {
   return (
     <button
-      className="absolute top-2 right-2 width-10 height-10 mm-text-white bg-transparent text-3xl border-transparent cursor-pointer"
+      className="absolute right-2 width-10 height-10 mm-text-white bg-transparent text-3xl border-transparent cursor-pointer"
       onClick={() => setShowSettings(showSettings)}
     >
-      {showSettings ? "↤" : "⚙"}
+      {showSettings ? "←" : "⚙"}
     </button>
   );
 };

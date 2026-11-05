@@ -11,11 +11,6 @@ interface CachedInventory {
 
 const cache = new Map<string, CachedInventory>();
 
-/**
- * Return the catalog of ecosystem inventory items (badges + species items + anything else
- * uploaded to this ecosystem). SDK pattern: `fetchInventoryItems()` populates the
- * `inventoryItems` getter.
- */
 export const getCachedInventoryItems = async (
   { credentials }: { credentials: Credentials },
   forceRefresh = false,

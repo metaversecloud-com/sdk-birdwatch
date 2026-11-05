@@ -101,8 +101,6 @@ export const WorldBirdCountTab = ({ onOpenFieldGuide }: { onOpenFieldGuide: () =
       <div className="bw-card bw-card-success">
         <div className="grid grid-col-2 justify-between mb-2">
           <strong>Your Field Guide</strong>
-          {/* <div className="grid">
-          </div> */}
           <button className="bw-btn-ghost" onClick={onOpenFieldGuide}>
             Explore →
           </button>

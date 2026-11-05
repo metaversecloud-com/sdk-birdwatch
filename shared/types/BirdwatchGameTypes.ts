@@ -54,11 +54,6 @@ export interface LegendaryAlert {
 
 export interface CollectionWorldState {
   collectionId: string;
-  /**
-   * sceneDropId of the key asset currently serving this Collection in this world.
-   * Set when the Collection is first played here, updated if the scene is removed and
-   * re-placed. Absent entries mean the Collection has never been played here.
-   */
   sceneDropId?: string;
   totalSightings: number;
   perBirdSightings: Record<string, number>;
@@ -71,12 +66,7 @@ export interface CollectionWorldState {
 
 export type LeaderboardEntryString = string;
 
-/**
- * World data object shape. Flat: no `birdwatch` wrapper, no `worldWide` wrapper.
- * `collections` is keyed by `collectionId`; the collection's own `sceneDropId` field
- * replaces the old `placedCollectionsBySceneDropId` lookup map.
- */
-export interface BirdwatchWorldState {
+export interface WorldState {
   adminSettings: AdminSettings;
   collections: Record<string, CollectionWorldState>;
   leaderboard: Record<string, LeaderboardEntryString>;
@@ -134,15 +124,7 @@ export interface VisitorPerScene {
   mysteryBird?: Record<string, VisitorMysteryBirdState>;
 }
 
-/**
- * Visitor data object shape. Birdwatch owns the visitor dataObject in its ecosystem,
- * so there's no `birdwatch` namespace — scene entries live at the top level, keyed by
- * `${urlSlug}-${sceneDropId}`.
- */
-export type BirdwatchVisitorDataObject = Record<string, VisitorPerScene>;
-
-export const sceneKey = (urlSlug: string, sceneDropId: string): string =>
-  `${urlSlug}-${sceneDropId}`;
+export const sceneKey = (urlSlug: string, sceneDropId: string): string => `${urlSlug}-${sceneDropId}`;
 
 export interface GameStateResponse {
   isAdmin: boolean;

@@ -13,8 +13,7 @@ export const emptyVisitorScene = (): VisitorPerScene => ({
 /**
  * Fetch the visitor + their per-scene slice of the Birdwatch data object.
  * Scene entries live at the top level of the visitor dataObject, keyed by
- * `${urlSlug}-${sceneDropId}` (no `birdwatch` wrapper, no `perScene` wrapper).
- * `shouldGetVisitorDetails` controls Visitor.get (richer, includes isAdmin) vs Visitor.create.
+ * `${urlSlug}-${sceneDropId}`.
  */
 export const getBirdwatchVisitor = async (
   credentials: Credentials,

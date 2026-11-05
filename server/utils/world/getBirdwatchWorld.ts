@@ -1,6 +1,6 @@
 import type { Credentials } from "../../types/index.js";
 import type { DataObjectPatch, IBirdwatchWorld } from "../../types/DroppedAssetTypes.js";
-import type { BirdwatchWorldState, CollectionWorldState } from "@shared/types/index.js";
+import type { WorldState, CollectionWorldState } from "@shared/types/index.js";
 import { DEFAULT_ADMIN_SETTINGS } from "@shared/types/index.js";
 import { World } from "../topiaInit.js";
 import { standardizeError } from "../standardizeError.js";
@@ -15,16 +15,14 @@ export const emptyCollectionState = (collectionId: string): CollectionWorldState
   mostSpotted: [],
 });
 
-export const emptyWorldState = (): BirdwatchWorldState => ({
+export const emptyWorldState = (): WorldState => ({
   adminSettings: { ...DEFAULT_ADMIN_SETTINGS },
   collections: {},
   leaderboard: {},
 });
 
 /**
- * Fetch and initialize the world data object. Flat shape:
- *   { adminSettings, collections, leaderboard }
- * No `birdwatch` wrapper, no `worldWide` wrapper, no `placedCollectionsBySceneDropId`.
+ * Fetch and initialize the world data object.
  * A Collection's placement is recorded as `collections[collectionId].sceneDropId`.
  */
 export const getBirdwatchWorld = async (credentials: Credentials): Promise<IBirdwatchWorld> => {
@@ -36,9 +34,7 @@ export const getBirdwatchWorld = async (credentials: Credentials): Promise<IBird
     const needsInit = !current || !current.adminSettings;
     if (needsInit) {
       const lockId = `world-${credentials.urlSlug}-init-${Math.round(Date.now() / 60000)}`;
-      await world
-        .updateDataObject(emptyWorldState(), { lock: { lockId, releaseLock: true } })
-        .catch(() => undefined);
+      await world.updateDataObject(emptyWorldState(), { lock: { lockId, releaseLock: true } }).catch(() => undefined);
       await world.fetchDataObject();
     } else {
       // Backfill newly-added top-level fields on existing worlds without blowing away data.

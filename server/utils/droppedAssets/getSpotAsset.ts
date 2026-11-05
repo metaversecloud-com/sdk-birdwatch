@@ -11,8 +11,7 @@ export class SpotAssetConfigError extends Error {
   }
 }
 
-const isSpotKey = (v: unknown): v is SpotKey =>
-  typeof v === "string" && (SPOT_KEYS as readonly string[]).includes(v);
+const isSpotKey = (v: unknown): v is SpotKey => typeof v === "string" && (SPOT_KEYS as readonly string[]).includes(v);
 
 export const getSpotAsset = async (
   credentials: Credentials,
@@ -22,6 +21,7 @@ export const getSpotAsset = async (
   try {
     const { assetId, urlSlug } = credentials;
     const asset = (await DroppedAsset.get(assetId, urlSlug, { credentials })) as unknown as ISpotAsset;
+
     if (!asset) throw new Error("Spot asset not found");
 
     await asset.fetchDataObject();
@@ -41,6 +41,7 @@ export const getSpotAsset = async (
         .catch(() => undefined);
       await asset.fetchDataObject();
     }
+
     return asset;
   } catch (error) {
     throw standardizeError(error);

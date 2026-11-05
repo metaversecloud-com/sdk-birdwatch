@@ -11,10 +11,9 @@ import { standardizeError } from "../standardizeError.js";
 export const grantSpeciesItem = async (
   credentials: Credentials,
   bird: Bird,
-  forceRefreshInventory = false,
 ): Promise<{ granted: boolean; reason?: string }> => {
   try {
-    const items = await getCachedInventoryItems({ credentials }, forceRefreshInventory);
+    const items = await getCachedInventoryItems({ credentials });
     const wantedName = speciesInventoryItemName(bird);
     const target = items.find((i) => i.name?.trim() === wantedName);
 
@@ -22,6 +21,7 @@ export const grantSpeciesItem = async (
 
     const visitor = Visitor.create(credentials.visitorId, credentials.urlSlug, { credentials });
     await visitor.grantInventoryItem(target, 1);
+
     return { granted: true };
   } catch (error) {
     throw standardizeError(error);

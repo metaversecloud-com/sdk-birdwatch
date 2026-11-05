@@ -21,8 +21,7 @@ interface SpotStatus {
   isReady: boolean;
 }
 
-const isSpotKey = (v: unknown): v is SpotKey =>
-  typeof v === "string" && (SPOT_KEYS as readonly string[]).includes(v);
+const isSpotKey = (v: unknown): v is SpotKey => typeof v === "string" && (SPOT_KEYS as readonly string[]).includes(v);
 
 /**
  * Extract `spot` + `collectionId` from a sibling spot's iframe URL. Admins place

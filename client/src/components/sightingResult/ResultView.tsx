@@ -61,7 +61,7 @@ export const ResultView = ({ result, assetId, onDone, onOpenFieldGuide, onSeeFie
             <BirdToken birdId={b.id} rarity={b.rarity} src={discoveredBirdImage(b.id)} size="sm" />
           </div>
           <div>
-            <p className="bw-info-banner__title">Badge earned: {b.name}</p>
+            <p className="bw-info-banner__title">New species added to your Field Guide!</p>
             <p className="bw-info-banner__sub">+1 to the {nawbCollection.name} Count</p>
           </div>
         </div>
@@ -78,7 +78,7 @@ export const ResultView = ({ result, assetId, onDone, onOpenFieldGuide, onSeeFie
         <BirdInfo bird={b} found={true} linksOn={false} />
       </div>
 
-      <button className="bw-btn-primary display-none" onClick={onSeeFieldGuidePage}>
+      <button className="bw-btn-primary hidden" onClick={onSeeFieldGuidePage}>
         See its Field Guide page
       </button>
       <button className="bw-btn-primary" onClick={onDone}>

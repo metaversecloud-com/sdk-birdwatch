@@ -28,6 +28,7 @@ export const handleResetBirdCount = async (req: Request, res: Response) => {
     }
 
     await world.updateDataObject(updates, {});
+
     return res.json({ success: true, data: { reset: Object.keys(updates).length } });
   } catch (error) {
     return errorHandler({

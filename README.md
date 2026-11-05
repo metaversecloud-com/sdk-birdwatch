@@ -14,11 +14,11 @@ Full product spec: see `.ai/templates/plan.md` for the implementation plan and t
 
 Three unique names — the **same across every Collection** and every spot type. Scene siblings are linked by `sceneDropId`, not by a stored link. The admin configures each asset's role at placement time via iframe URL query params.
 
-| Unique name | Count per scene | URL params the admin sets at placement |
-|---|---|---|
-| `Birdwatch_keyAsset` | 1 | `?collectionId=north_american_winter_birds` |
-| `Birdwatch_spot` | 4+ (at least one of each spot type; duplicates allowed) | `?collectionId=north_american_winter_birds&spot=feeder` (or `pine_woods` / `frozen_pond` / `berry_bushes`) |
-| `Birdwatch_trophy` | 1 | *(none — no app state)* |
+| Unique name          | Count per scene                                         | URL params the admin sets at placement                                                                     |
+| -------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `Birdwatch_keyAsset` | 1                                                       | `?collectionId=north_american_winter_birds`                                                                |
+| `Birdwatch_spot`     | 4+ (at least one of each spot type; duplicates allowed) | `?collectionId=north_american_winter_birds&spot=feeder` (or `pine_woods` / `frozen_pond` / `berry_bushes`) |
+| `Birdwatch_trophy`   | 1                                                       | _(none — no app state)_                                                                                    |
 
 **First-touch behavior.** If the asset's data object isn't initialized yet AND the URL is missing a required param, the server returns a 400 with a world-builder-facing message. Fail-loud > guess-silently.
 
@@ -34,16 +34,16 @@ Three unique names — the **same across every Collection** and every spot type.
 
 ## API Endpoints
 
-| Method | Path | Body | Response |
-|---|---|---|---|
-| `GET` | `/api/game-state` | — | `{ success, data: GameStateResponse, visitorInventory, visitorBirdItems, profileId, displayName }` |
-| `POST` | `/api/sightings/start` | — | `{ success, reused, data: { sighting: VisitorInFlightSighting } }` |
-| `POST` | `/api/sightings/resolve` | `{ pickedBirdId }` | `{ success, data: { outcome: "new_species" \| "repeat" \| "wrong", rightBird, pickedBird, timesSpotted?, grantedBadges, milestoneCrossed?, newTotalSightings?, yourSpeciesCount? } }` |
-| `GET` | `/api/cooldown/:assetId` | — | `{ success, data: { remainingSeconds, spotsToTry: SpotStatus[], activeLegendaryAlert? } }` |
-| `POST` | `/api/admin/settings` | `Partial<AdminSettings>` | `{ success, data: { adminSettings } }` (admin only) |
-| `POST` | `/api/admin/reset-bird-count` | — | `{ success, data: { reset: n } }` (admin only) |
-| `POST` | `/api/admin/reset-leaderboard` | — | `{ success, data: { leaderboard: {} } }` (admin only) |
-| `POST` | `/api/mystery/guess` (stretch) | `{ collectionId, pickedBirdId }` | `{ success, data: { outcome: "solved" \| "wrong" \| "out", answerBirdId, answerSpot, guessesLeft, grantedBadges, state } }` |
+| Method | Path                           | Body                             | Response                                                                                                                                                                              |
+| ------ | ------------------------------ | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/game-state`              | —                                | `{ success, data: GameStateResponse, visitorInventory, visitorBirdItems, profileId, displayName }`                                                                                    |
+| `POST` | `/api/sightings/start`         | —                                | `{ success, reused, data: { sighting: VisitorInFlightSighting } }`                                                                                                                    |
+| `POST` | `/api/sightings/resolve`       | `{ pickedBirdId }`               | `{ success, data: { outcome: "new_species" \| "repeat" \| "wrong", rightBird, pickedBird, timesSpotted?, grantedBadges, milestoneCrossed?, newTotalSightings?, yourSpeciesCount? } }` |
+| `GET`  | `/api/cooldown/:assetId`       | —                                | `{ success, data: { remainingSeconds, spotsToTry: SpotStatus[], activeLegendaryAlert? } }`                                                                                            |
+| `POST` | `/api/admin/settings`          | `Partial<AdminSettings>`         | `{ success, data: { adminSettings } }` (admin only)                                                                                                                                   |
+| `POST` | `/api/admin/reset-bird-count`  | —                                | `{ success, data: { reset: n } }` (admin only)                                                                                                                                        |
+| `POST` | `/api/admin/reset-leaderboard` | —                                | `{ success, data: { leaderboard: {} } }` (admin only)                                                                                                                                 |
+| `POST` | `/api/mystery/guess` (stretch) | `{ collectionId, pickedBirdId }` | `{ success, data: { outcome: "solved" \| "wrong" \| "out", answerBirdId, answerSpot, guessesLeft, grantedBadges, state } }`                                                           |
 
 All endpoints accept the standard Topia iframe credentials via query params; `forceRefreshInventory=true` busts the ecosystem-inventory cache for that request.
 
@@ -52,24 +52,24 @@ All endpoints accept the standard Topia iframe credentials via query params; `fo
 ### World data object (`world.dataObject.birdwatch`)
 
 ```ts
-interface BirdwatchWorldState {
+interface WorldState {
   perCollection: Record<string, CollectionWorldState>;
   worldWide: {
     leaderboard: Record<profileId, "displayName|speciesCount|reachedAt">; // pipe-concat strings keep the record small
-    placedCollectionsBySceneDropId: Record<collectionId, sceneDropId>;    // "which Collections are placed in this world"
+    placedCollectionsBySceneDropId: Record<collectionId, sceneDropId>; // "which Collections are placed in this world"
   };
-  adminSettings: { identificationMode, cooldownSeconds, allAboutBirdsLinksEnabled };
+  adminSettings: { identificationMode; cooldownSeconds; allAboutBirdsLinksEnabled };
 }
 
 interface CollectionWorldState {
   collectionId: string;
   totalSightings: number;
   perBirdSightings: Record<birdId, count>;
-  perPlayerContribution: Record<profileId, count>;  // keys are the participants list for Champion Birder on M3
-  milestones: { rareBoostUnlocked, legendaryBoostUnlocked, championBadgeUnlocked };
-  mostSpotted: { birdId, count }[];                // top 3
-  rarestSighting?: { birdId, rarity, byDisplayName, bySightingAt };
-  activeLegendaryAlert?: { alertId, birdId, spot, firedAt, byProfileId, byDisplayName };
+  perPlayerContribution: Record<profileId, count>; // keys are the participants list for Champion Birder on M3
+  milestones: { rareBoostUnlocked; legendaryBoostUnlocked; championBadgeUnlocked };
+  mostSpotted: { birdId; count }[]; // top 3
+  rarestSighting?: { birdId; rarity; byDisplayName; bySightingAt };
+  activeLegendaryAlert?: { alertId; birdId; spot; firedAt; byProfileId; byDisplayName };
 }
 ```
 
@@ -77,11 +77,14 @@ interface CollectionWorldState {
 
 ```ts
 interface VisitorPerScene {
-  collections: Record<collectionId, { birdRecords: Record<birdId, { firstSpottedAt, timesSpotted }>, milestoneBannerSeen }>;
-  spotCooldowns: Record<assetId, { startedAt, durationSeconds }>;
+  collections: Record<
+    collectionId,
+    { birdRecords: Record<birdId, { firstSpottedAt; timesSpotted }>; milestoneBannerSeen }
+  >;
+  spotCooldowns: Record<assetId, { startedAt; durationSeconds }>;
   inFlight?: Record<assetId, VisitorInFlightSighting>;
-  perWorldSpeciesReachedAt?: number;             // leaderboard tiebreak
-  legendaryAlertUsage?: { alertId, usedAssetIds };
+  perWorldSpeciesReachedAt?: number; // leaderboard tiebreak
+  legendaryAlertUsage?: { alertId; usedAssetIds };
   mysteryBird?: Record<collectionId, VisitorMysteryBirdState>;
 }
 ```
@@ -100,22 +103,14 @@ Scene siblings are found via `sceneDropId` queries, not stored links.
 
 ## Ecosystem Inventory
 
-Each ecosystem must have one inventory item per bird (uploaded via the inventory ZIP described below) and the badge items. Items are matched by exact `name`:
+Each ecosystem must have one inventory item per bird plus the badge items. Items are matched by exact `name`:
 
-- Species items: `Birdwatch — {Bird name}` (e.g. `Birdwatch — Black-capped Chickadee`) with metadata `{ birdId, collectionId, spot, rarity, sortOrder }`.
-- Milestones: `Birdwatch — First Sighting`, `Birdwatch — Avid Birder`, `Birdwatch — Rare Find`, `Birdwatch — Legendary Birder`.
-- Per-Collection: `Birdwatch — Complete · {Collection name}`, `Birdwatch — Champion Birder · {Collection name}`.
-- Mystery (stretch): `Birdwatch — Mystery Solved`, `Sharp Eye`, `Bird Detective`, `Mystery Master`, `First Try`.
+- Species items (type `ITEM`): `{Bird name}` (e.g. `Black-capped Chickadee`) with metadata `{ birdId, collectionId, spot, rarity, sortOrder }`.
+- Milestones (type `BADGE`, across every Collection): `First Sighting`, `Avid Birder`, `Rare Find`, `Legendary Birder`, `Bird Spotter`, `Keen Birder`, `Expert Birder`.
+- Mystery Bird (type `BADGE`, across every Collection): `Mystery Solved`, `Sharp Eye`, `Bird Detective`, `Mystery Master`, `First Try`.
+- North American Winter Birds (type `BADGE`, per-Collection): `North American Winter Birds Complete`, `North American Winter Champion Birder`, `Winter Feeder Birds`, `Winter Pine Woods Birds`, `Winter Frozen Pond Birds`, `Winter Berry Bushes Birds`.
 
-### Building the inventory ZIP
-
-```bash
-npx tsx scripts/buildInventoryZip.ts \
-  --images "/path/to/Discovered State" \
-  --out    "/path/to/birdwatch-inventory.zip"
-```
-
-Reads the 23-bird registry from `server/data/collections/northAmericanWinterBirds.ts` and the Discovered-State PNGs; writes `images/{birdId}.png` + `manifest.json`. Rerun whenever the Bird Pages sheet changes.
+The inventory ZIP itself is distributed as an artifact, not built from the repo — the server reads item names from `server/utils/inventory/badgeNames.ts` and `shared/types/BirdTypes.ts` at runtime.
 
 ## Development
 
@@ -152,7 +147,7 @@ The CSV source lives in Google Sheets (see spec Appendix). When Shelby edits a s
 python3 scripts/gen_bird_data.py   # emits server/data/collections/*.ts
 ```
 
-The Python script is a bootstrapping helper; a TS equivalent lives at `scripts/buildInventoryZip.ts` for the inventory artifact.
+The Python script is a bootstrapping helper.
 
 ## For Developers
 

@@ -24,7 +24,6 @@ type Panel = "tabs" | "admin";
 export const Home = () => {
   const dispatch = useContext(GlobalDispatchContext);
   const { gameState } = useContext(GlobalStateContext);
-  console.log("🚀 ~ Home.tsx:27 ~ gameState:", gameState);
   const [searchParams] = useSearchParams();
   // Initial tab honors `?tab=fg` so SpotDrawer's "Open Field Guide" button lands on the right tab.
   const initialTab: Tab = searchParams.get("tab") === "fg" ? "fg" : "wbc";

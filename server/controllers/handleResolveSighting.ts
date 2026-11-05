@@ -12,16 +12,31 @@ import {
   participantsFor,
   grantSpeciesItem,
   awardBadge,
-  speciesBadgeName,
   collectionCompleteBadge,
   championBirderBadge,
+  spotBadge,
   MILESTONE_BADGES,
+  TOTAL_CORRECT_ID_THRESHOLDS,
   World,
 } from "@utils/index.js";
-import type { LegendaryAlert, VisitorBirdRecord } from "@shared/types/index.js";
+import type { LegendaryAlert, VisitorBirdRecord, VisitorPerScene } from "@shared/types/index.js";
 import { RARITY_LABEL, sceneKey } from "@shared/types/index.js";
 import type { DataObjectPatch } from "../types/DroppedAssetTypes.js";
 import { getCollectionData } from "../data/collections/index.js";
+
+/** Sum of timesSpotted across every scene / collection / bird on the visitor's dataObject. */
+const sumLifetimeCorrectIds = (dataObject: Record<string, VisitorPerScene | undefined>): number => {
+  let total = 0;
+  for (const scene of Object.values(dataObject || {})) {
+    if (!scene || typeof scene !== "object" || !scene.collections) continue;
+    for (const col of Object.values(scene.collections)) {
+      for (const rec of Object.values(col?.birdRecords || {})) {
+        total += rec?.timesSpotted || 0;
+      }
+    }
+  }
+  return total;
+};
 
 const LEGENDARY_WINDOW_MS = 5 * 60 * 1000;
 
@@ -33,7 +48,6 @@ export const handleResolveSighting = async (req: Request, res: Response) => {
   try {
     const credentials = getCredentials(req.query);
     const { assetId, urlSlug, sceneDropId, profileId, displayName } = credentials;
-    const forceRefreshInventory = req.query.forceRefreshInventory === "true";
     const { pickedBirdId } = (req.body || {}) as ResolveBody;
 
     if (!pickedBirdId) {
@@ -71,9 +85,7 @@ export const handleResolveSighting = async (req: Request, res: Response) => {
       await visitor.updateDataObject(
         { [`${key}.inFlight.${assetId}`]: null },
         {
-          analytics: [
-            { analyticName: "birdIDs-wrong", uniqueKey: profileId, urlSlug },
-          ],
+          analytics: [{ analyticName: "birdIDs-wrong", uniqueKey: profileId, urlSlug }],
         },
       );
       return res.json({
@@ -120,8 +132,7 @@ export const handleResolveSighting = async (req: Request, res: Response) => {
 
     // Legendary alert bookkeeping.
     let nextLegendaryAlert: LegendaryAlert | undefined = collectionState.activeLegendaryAlert;
-    const alertStillFresh =
-      nextLegendaryAlert && now - nextLegendaryAlert.firedAt < LEGENDARY_WINDOW_MS;
+    const alertStillFresh = nextLegendaryAlert && now - nextLegendaryAlert.firedAt < LEGENDARY_WINDOW_MS;
     let fireLegendaryWorldToast = false;
     if (rightBird.rarity === "legendary" && !alertStillFresh) {
       nextLegendaryAlert = {
@@ -163,20 +174,19 @@ export const handleResolveSighting = async (req: Request, res: Response) => {
       [`collections.${inFlight.collectionId}.activeLegendaryAlert`]: nextLegendaryAlert,
       leaderboard: nextLeaderboard,
     };
-    await world.updateDataObject(
-      worldPatch,
-      {
-        analytics: [
-          { analyticName: "birdIDs-correct", uniqueKey: profileId, urlSlug },
-          { analyticName: `sightings-${rightBird.rarity}`, uniqueKey: profileId, urlSlug },
-          ...(isNewSpecies ? [{ analyticName: "speciesLogs", uniqueKey: profileId, urlSlug }] : []),
-          ...(milestoneCross
-            ? [{ analyticName: "milestoneReaches", uniqueKey: `${inFlight.collectionId}:${milestoneCross}` }]
-            : []),
-          ...(fireLegendaryWorldToast ? [{ analyticName: "legendaryAlerts", uniqueKey: `${inFlight.collectionId}:${now}` }] : []),
-        ],
-      },
-    );
+    await world.updateDataObject(worldPatch, {
+      analytics: [
+        { analyticName: "birdIDs-correct", uniqueKey: profileId, urlSlug },
+        { analyticName: `sightings-${rightBird.rarity}`, uniqueKey: profileId, urlSlug },
+        ...(isNewSpecies ? [{ analyticName: "speciesLogs", uniqueKey: profileId, urlSlug }] : []),
+        ...(milestoneCross
+          ? [{ analyticName: "milestoneReaches", uniqueKey: `${inFlight.collectionId}:${milestoneCross}` }]
+          : []),
+        ...(fireLegendaryWorldToast
+          ? [{ analyticName: "legendaryAlerts", uniqueKey: `${inFlight.collectionId}:${now}` }]
+          : []),
+      ],
+    });
 
     // Update visitor data: bird record, perWorldSpeciesReachedAt, clear in-flight.
     const nextRecord: VisitorBirdRecord = isNewSpecies
@@ -191,13 +201,11 @@ export const handleResolveSighting = async (req: Request, res: Response) => {
 
     await visitor.updateDataObject(visitorUpdates, {});
 
-    // Grant inventory + badges. These may silently no-op if the ecosystem doesn't have the items yet.
-    const grantedBadges: string[] = [];
+    // Grant the species ITEM (Field Guide entry). Fire-and-forget: the client re-opens
+    // /game-state with `?forceRefreshInventory=true` to pick up the new item. Blocking
+    // the response on an ecosystem round-trip just delays the result banner.
     if (isNewSpecies) {
-      await grantSpeciesItem(credentials, rightBird, forceRefreshInventory).catch(() => undefined);
-      await awardBadge(credentials, profileId, speciesBadgeName(rightBird), forceRefreshInventory)
-        .then((r) => r.granted && grantedBadges.push(speciesBadgeName(rightBird)))
-        .catch(() => undefined);
+      grantSpeciesItem(credentials, rightBird).catch(() => undefined);
     }
 
     // Milestone badges (first-time only, per visitor).
@@ -209,22 +217,45 @@ export const handleResolveSighting = async (req: Request, res: Response) => {
     );
 
     const totalSpeciesEver = allVisitorBirdIds.size;
-    const tryAward = async (name: string) => {
+    // Lifetime correct IDs (repeats included) across every scene, every Collection, every bird —
+    // + the +1 we're about to apply for this correct pick.
+    const lifetimeCorrectIds = sumLifetimeCorrectIds(visitor.dataObject) + 1;
+    // Fire-and-forget: same reasoning as `grantSpeciesItem` above. The next
+    // /game-state?forceRefreshInventory=true picks up any newly-granted badge.
+    const tryAward = (name: string) => {
       if (inventoryBadgeNames.has(name)) return;
-      const r = await awardBadge(credentials, profileId, name, forceRefreshInventory).catch(() => ({
-        granted: false,
-      }));
-      if (r.granted) grantedBadges.push(name);
+      awardBadge(credentials, profileId, name).catch(() => undefined);
     };
 
-    if (totalSpeciesEver >= 1) await tryAward(MILESTONE_BADGES.firstSighting);
-    if (totalSpeciesEver >= 10) await tryAward(MILESTONE_BADGES.avidBirder);
-    if (isNewSpecies && rightBird.rarity === "rare") await tryAward(MILESTONE_BADGES.rareFind);
-    if (isNewSpecies && rightBird.rarity === "legendary") await tryAward(MILESTONE_BADGES.legendaryBirder);
+    // Field-Guide milestone badges (unique species across all Collections).
+    if (totalSpeciesEver >= 1) tryAward(MILESTONE_BADGES.firstSighting);
+    if (totalSpeciesEver >= 10) tryAward(MILESTONE_BADGES.avidBirder);
+    if (isNewSpecies && rightBird.rarity === "rare") tryAward(MILESTONE_BADGES.rareFind);
+    if (isNewSpecies && rightBird.rarity === "legendary") tryAward(MILESTONE_BADGES.legendaryBirder);
 
-    // Collection complete badge: if player's unique count in THIS collection equals species total.
+    // Total-correct-ID milestone badges (repeats included).
+    if (lifetimeCorrectIds >= TOTAL_CORRECT_ID_THRESHOLDS.birdSpotter) {
+      tryAward(MILESTONE_BADGES.birdSpotter);
+    }
+    if (lifetimeCorrectIds >= TOTAL_CORRECT_ID_THRESHOLDS.keenBirder) {
+      tryAward(MILESTONE_BADGES.keenBirder);
+    }
+    if (lifetimeCorrectIds >= TOTAL_CORRECT_ID_THRESHOLDS.expertBirder) {
+      tryAward(MILESTONE_BADGES.expertBirder);
+    }
+
+    // Per-Collection badges.
     if (newUniqueCount >= data.collection.species.length) {
-      await tryAward(collectionCompleteBadge(data.collection));
+      // Collection complete — visitor has every bird in this Collection.
+      tryAward(collectionCompleteBadge(data.collection));
+    }
+
+    // Per-spot completion badge: if the visitor now has every bird at this bird's spot
+    // (within this Collection), award the spot badge.
+    if (isNewSpecies) {
+      const spotBirds = data.birdsBySpot[rightBird.spot];
+      const haveAtSpot = spotBirds.every((b) => b.id === rightBird.id || Boolean(perColVisitor[b.id]));
+      if (haveAtSpot) tryAward(spotBadge(data.collection, rightBird.spot));
     }
 
     // Fire the world-wide Legendary toast.
@@ -240,15 +271,14 @@ export const handleResolveSighting = async (req: Request, res: Response) => {
         .catch(() => undefined);
     }
 
-    // Milestone 3: Champion Birder badge to every participant.
+    // Milestone 3: Champion Birder badge to every participant. Fire-and-forget per-pid;
+    // each participant picks up the badge on their next /game-state?forceRefreshInventory=true.
     if (milestoneCross === "m3") {
       const participants = participantsFor({ ...collectionState, perPlayerContribution: nextPerPlayer });
       const championBadge = championBirderBadge(data.collection);
-      await Promise.all(
-        participants.map((pid) =>
-          awardBadge(credentials, pid, championBadge, forceRefreshInventory).catch(() => undefined),
-        ),
-      );
+      for (const pid of participants) {
+        awardBadge(credentials, pid, championBadge).catch(() => undefined);
+      }
       World.create(urlSlug, { credentials })
         .fireToast({
           title: "Champion Birders!",
@@ -284,7 +314,6 @@ export const handleResolveSighting = async (req: Request, res: Response) => {
         rightBird,
         pickedBird,
         timesSpotted: nextRecord.timesSpotted,
-        grantedBadges,
         milestoneCrossed: milestoneCross,
         legendaryAlertStarted: fireLegendaryWorldToast ? nextLegendaryAlert : undefined,
         newTotalSightings: nextTotal,

@@ -10,6 +10,7 @@ import {
   registerPlacedCollection,
   getVisitorBadges,
   getVisitorBirdItems,
+  invalidateInventoryCache,
 } from "@utils/index.js";
 import { emptyCollectionState } from "@utils/world/getBirdwatchWorld.js";
 import { emptyVisitorScene } from "@utils/visitor/getBirdwatchVisitor.js";
@@ -28,7 +29,9 @@ export const handleGetGameState = async (req: Request, res: Response) => {
   try {
     const credentials = getCredentials(req.query);
     const { profileId, displayName, sceneDropId, uniqueName } = credentials;
+
     const forceRefreshInventory = req.query.forceRefreshInventory === "true";
+    if (forceRefreshInventory) invalidateInventoryCache(credentials.interactivePublicKey);
 
     const queryCollectionId = typeof req.query.collectionId === "string" ? req.query.collectionId : undefined;
     const querySpot = typeof req.query.spot === "string" ? req.query.spot : undefined;
@@ -101,7 +104,6 @@ export const handleGetGameState = async (req: Request, res: Response) => {
       visitorBirdItems: getVisitorBirdItems(visitor),
       profileId,
       displayName,
-      forceRefreshInventory,
     });
   } catch (error) {
     return errorHandler({

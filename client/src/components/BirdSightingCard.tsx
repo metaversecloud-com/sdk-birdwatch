@@ -63,16 +63,10 @@ export const BirdSightingCard = ({ sighting, mode, onPick, disabled }: Props) =>
                 <p className="bw-choice__name">{b.name}</p>
                 <p className="bw-choice__desc">{b.fieldMark}</p>
               </div>
-              {isSelected && disabled && (
-                // <svg className="bw-spin shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-label="Checking…">
-                //   <circle cx="12" cy="12" r="10" stroke="var(--bw-primary-soft)" strokeWidth="4" />
-                //   <path d="M22 12a10 10 0 0 1-10 10" stroke="var(--bw-primary)" strokeWidth="4" strokeLinecap="round" />
-                // </svg>
-                <Spinner label="Checking…" />
-              )}
             </button>
           );
         })}
+        {disabled && <Spinner label="Checking…" />}
       </div>
     </div>
   );

@@ -10,7 +10,6 @@ type Filter = "all" | "found" | "missing";
 
 export const FieldGuideTab = ({ onOpenBird }: { onOpenBird: (bird: Bird) => void }) => {
   const { visitorBirdItems } = useContext(GlobalStateContext);
-  console.log("🚀 ~ FieldGuideTab.tsx:13 ~ visitorBirdItems:", visitorBirdItems);
   const [filter, setFilter] = useState<Filter>("all");
 
   const birdsBySpot = useMemo(() => {

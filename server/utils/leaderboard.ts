@@ -23,9 +23,7 @@ export const decodeEntry = (profileId: string, value: LeaderboardEntryString): L
   return { profileId, displayName, speciesCount, reachedAt };
 };
 
-export const parseLeaderboard = (
-  record: Record<string, LeaderboardEntryString> | undefined,
-): LeaderboardEntry[] => {
+export const parseLeaderboard = (record: Record<string, LeaderboardEntryString> | undefined): LeaderboardEntry[] => {
   if (!record) return [];
   const entries: LeaderboardEntry[] = [];
   for (const [profileId, value] of Object.entries(record)) {

@@ -29,10 +29,21 @@ export interface Bird {
   sortOrder: number;
 }
 
+export interface CollectionBadgeNames {
+  /** Awarded when the visitor has found every bird in this Collection. */
+  complete: string;
+  /** Awarded to every participant when this world reaches M3 for this Collection. */
+  champion: string;
+  /** Per-spot completion badges: awarded when the visitor has found every bird at that spot. */
+  spots: Record<SpotKey, string>;
+}
+
 export interface Collection {
   id: string;
   name: string;
   species: Bird[];
+  /** Badge names for this Collection (per-collection, so the UI reads the right display name). */
+  badges: CollectionBadgeNames;
 }
 
 export const RARITY_WEIGHT_BASE: Record<Rarity, number> = {

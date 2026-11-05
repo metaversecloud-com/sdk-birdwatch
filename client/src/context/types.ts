@@ -50,7 +50,6 @@ export interface ResultDataType {
   rightBird: Bird;
   pickedBird: Bird;
   timesSpotted?: number;
-  grantedBadges?: string[];
   newTotalSightings?: number;
   yourSpeciesCount?: number;
 }

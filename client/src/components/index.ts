@@ -1,5 +1,4 @@
 export * from "./sightingResult";
-export { Loading } from "./Loading";
 export { PageContainer } from "./PageContainer";
 export { AdminIconButton } from "./AdminIconButton";
 export { AdminView } from "./AdminView";

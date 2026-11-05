@@ -61,8 +61,8 @@ body {
 
 /* Highlighted result cards (correct result spotlight on the bird). */
 .bw-card--new-species {
-  background: var(--bw-primary-soft);
-  border: 1px solid color-mix(in srgb, var(--bw-primary) 25%, transparent);
+  background: var(--bw-warn-soft);
+  border: 1px solid color-mix(in srgb, var(--bw-warn) 25%, transparent);
 }
 .bw-card--repeat {
   background: var(--bw-sky);
@@ -255,7 +255,7 @@ body {
   color: var(--bw-legendary);
 }
 .bw-chip--new {
-  background: var(--bw-primary);
+  background: var(--bw-warn);
   color: #fff;
   font-size: 0.7rem;
   padding: 0.25rem 0.7rem;

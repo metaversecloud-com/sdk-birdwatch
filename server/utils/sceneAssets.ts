@@ -11,9 +11,8 @@ import { standardizeError } from "./standardizeError.js";
 export const getSceneSiblings = async (credentials: Credentials) => {
   try {
     const { urlSlug, sceneDropId } = credentials;
+
     const world = World.create(urlSlug, { credentials });
-    // The SDK's return type is the DroppedAsset class; the DroppedAssetInterface is what
-    // actually exposes `uniqueName`. The class implements it, so this reinterpretation is safe.
     const assets = (await world.fetchDroppedAssetsBySceneDropId({ sceneDropId })) as unknown as DroppedAssetInterface[];
 
     const keyAssets: IKeyAsset[] = [];

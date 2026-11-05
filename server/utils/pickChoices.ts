@@ -1,7 +1,6 @@
 import type { Bird, SpotKey } from "@shared/types/index.js";
 import { getCollectionData } from "../data/collections/index.js";
 
-/** Strict 4-step choice selection per plan §5 US 1.1. */
 export const pickChoices = (
   collectionId: string,
   spot: SpotKey,
@@ -15,9 +14,7 @@ export const pickChoices = (
   if (sameSpotPool.length === 0) throw new Error(`No same-spot wrong choice available for ${spot}`);
   const wrong1 = sameSpotPool[Math.floor(rng() * sameSpotPool.length)];
 
-  const anywherePool = data.collection.species.filter(
-    (b) => b.id !== rightBird.id && b.id !== wrong1.id,
-  );
+  const anywherePool = data.collection.species.filter((b) => b.id !== rightBird.id && b.id !== wrong1.id);
   if (anywherePool.length === 0) throw new Error(`No second wrong choice available`);
   const wrong2 = anywherePool[Math.floor(rng() * anywherePool.length)];
 
@@ -27,5 +24,6 @@ export const pickChoices = (
     const j = Math.floor(rng() * (i + 1));
     [choices[i], choices[j]] = [choices[j], choices[i]];
   }
+
   return choices;
 };
