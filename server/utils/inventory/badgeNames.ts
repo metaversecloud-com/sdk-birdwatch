@@ -2,7 +2,7 @@ import type { Bird, Collection, SpotKey } from "@shared/types/index.js";
 
 /**
  * Badge names in the ecosystem inventory catalog. These are the exact names used when
- * calling `awardBadge` — they MUST match the inventory ZIP item names 1:1.
+ * calling `awardBadges` — they MUST match the inventory ZIP item names 1:1.
  */
 
 /** Cross-Collection milestone badges — count across every world / every Collection. */

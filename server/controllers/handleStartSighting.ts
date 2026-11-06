@@ -8,16 +8,15 @@ import {
   ensureCollectionState,
   rollBirdForSpot,
   pickChoices,
+  milestoneStateFor,
 } from "@utils/index.js";
-import type { VisitorInFlightSighting, VisitorSpotCooldown } from "@shared/types/index.js";
+import type { VisitorInFlightSighting } from "@shared/types/index.js";
 import type { DataObjectPatch } from "../types/DroppedAssetTypes.js";
 import { sceneKey } from "@shared/types/index.js";
 import { getCollectionData } from "../data/collections/index.js";
 
-const inCooldown = (cd: VisitorSpotCooldown | undefined, now: number): boolean => {
-  if (!cd) return false;
-  return now - cd.startedAt < cd.durationSeconds * 1000;
-};
+/** Cooldowns are stored as an end time (ms). Anything else is treated as expired. */
+const inCooldown = (endsAt: unknown, now: number): boolean => typeof endsAt === "number" && now < endsAt;
 
 /**
  * POST /api/sightings/start — called when a visitor clicks a spot asset.
@@ -75,33 +74,24 @@ export const handleStartSighting = async (req: Request, res: Response) => {
       : rollBirdForSpot(
           spotMeta.collectionId,
           spotMeta.spot,
-          collectionState?.milestones || {
-            rareBoostUnlocked: false,
-            legendaryBoostUnlocked: false,
-            championBadgeUnlocked: false,
-          },
+          milestoneStateFor(collectionState?.totalSightings || 0),
         );
 
     const [a, b, c] = pickChoices(spotMeta.collectionId, spotMeta.spot, rightBird);
 
     const inFlight: VisitorInFlightSighting = {
-      assetId,
-      spotKey: spotMeta.spot,
       collectionId: spotMeta.collectionId,
       birdId: rightBird.id,
       choiceBirdIds: [a.id, b.id, c.id],
-      rolledAt: now,
-      isLegendarySkip: isLegendarySkip || undefined,
     };
 
-    const cooldown: VisitorSpotCooldown = isLegendarySkip
-      ? { startedAt: now, durationSeconds: 60 }
-      : { startedAt: now, durationSeconds: adminSettings?.cooldownSeconds ?? 60 };
+    const cooldownSeconds = isLegendarySkip ? 60 : (adminSettings?.cooldownSeconds ?? 60);
+    const cooldownEndsAt = now + cooldownSeconds * 1000;
 
     // Update: track usage of the Legendary Alert for this player + record in-flight + cooldown.
     const updates: DataObjectPatch = {
       [`${key}.inFlight.${assetId}`]: inFlight,
-      [`${key}.spotCooldowns.${assetId}`]: cooldown,
+      [`${key}.spotCooldowns.${assetId}`]: cooldownEndsAt,
     };
     if (isLegendarySkip) {
       const prior = legendaryUsage?.alertId === activeAlert!.alertId ? legendaryUsage : undefined;

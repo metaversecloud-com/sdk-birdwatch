@@ -6,7 +6,6 @@ import { Visitor } from "../topiaInit.js";
 import { standardizeError } from "../standardizeError.js";
 
 export const emptyVisitorScene = (): VisitorPerScene => ({
-  collections: {},
   spotCooldowns: {},
 });
 

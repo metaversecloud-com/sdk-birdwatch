@@ -1,18 +1,23 @@
 import type { Credentials } from "../../types/index.js";
 import type { DataObjectPatch, IWorld } from "../../types/DroppedAssetTypes.js";
-import type { WorldState, CollectionWorldState } from "@shared/types/index.js";
+import type { WorldState, CollectionWorldState, CollectionWorldStateView } from "@shared/types/index.js";
 import { DEFAULT_ADMIN_SETTINGS } from "@shared/types/index.js";
 import { World } from "../topiaInit.js";
 import { standardizeError } from "../standardizeError.js";
-import { DEFAULT_MILESTONE_STATE } from "../milestones.js";
+import { milestoneStateFor } from "../milestones.js";
+import { computeMostSpotted } from "../mostSpotted.js";
 
-export const emptyCollectionState = (collectionId: string): CollectionWorldState => ({
-  collectionId,
+export const emptyCollectionState = (): CollectionWorldState => ({
   totalSightings: 0,
   perBirdSightings: {},
   perPlayerContribution: {},
-  milestones: { ...DEFAULT_MILESTONE_STATE },
-  mostSpotted: [],
+});
+
+/** Add the values derived from stored counts (milestones, most spotted). */
+export const toCollectionView = (state: CollectionWorldState): CollectionWorldStateView => ({
+  ...state,
+  milestones: milestoneStateFor(state.totalSightings || 0),
+  mostSpotted: computeMostSpotted(state.perBirdSightings || {}),
 });
 
 export const emptyWorldState = (): WorldState => ({
@@ -59,7 +64,7 @@ export const ensureCollectionState = async (
 ): Promise<CollectionWorldState> => {
   const state = world.dataObject?.collections?.[collectionId];
   if (state) return state;
-  const seeded = emptyCollectionState(collectionId);
+  const seeded = emptyCollectionState();
   const patch: DataObjectPatch = { [`collections.${collectionId}`]: seeded };
   await world.updateDataObject(patch, {}).catch(() => undefined);
   await world.fetchDataObject();

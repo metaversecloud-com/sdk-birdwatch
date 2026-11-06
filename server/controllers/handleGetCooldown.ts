@@ -6,6 +6,7 @@ import {
   getSceneSiblings,
   getSpotAsset,
   getCredentials,
+  getVisitorBirdItems,
 } from "@utils/index.js";
 import type { SpotKey } from "@shared/types/index.js";
 import { SPOT_KEYS, SPOT_LABELS } from "@shared/types/index.js";
@@ -47,7 +48,7 @@ export const handleGetCooldown = async (req: Request, res: Response) => {
     const { assetId } = credentials;
 
     const world = await getWorld(credentials);
-    const { perScene } = await getVisitor(credentials, false);
+    const { visitor, perScene } = await getVisitor(credentials, false, { includeInventory: true });
 
     // Pin down the current spot's Collection — fall back to the first registered Collection
     // (handles the case where the asset's data object hasn't been initialized yet).
@@ -64,9 +65,11 @@ export const handleGetCooldown = async (req: Request, res: Response) => {
       currentCollectionId = Object.keys(world.dataObject.collections || {})[0];
     }
 
-    const myCd = perScene.spotCooldowns?.[assetId];
     const now = Date.now();
-    const remaining = myCd ? Math.max(0, myCd.durationSeconds - Math.floor((now - myCd.startedAt) / 1000)) : 0;
+    // Cooldowns are stored as an end time (ms). Anything else is treated as expired.
+    const remainingSeconds = (endsAt: unknown) =>
+      typeof endsAt === "number" ? Math.max(0, Math.ceil((endsAt - now) / 1000)) : 0;
+    const remaining = remainingSeconds(perScene.spotCooldowns?.[assetId]);
 
     // Build a map { spotKey → assetId } for sibling spots in this scene. Prefer the data
     // object; if that's uninitialized, fall back to parsing the sibling's clickableLink.
@@ -94,16 +97,14 @@ export const handleGetCooldown = async (req: Request, res: Response) => {
     const data = currentCollectionId ? getCollectionData(currentCollectionId) : undefined;
     const statuses: SpotStatus[] = [];
     if (data) {
-      const foundIds = new Set(Object.keys(perScene.collections?.[currentCollectionId!]?.birdRecords || {}));
+      // Field Guide (inventory) is the source of truth for found birds.
+      const foundIds = new Set(Object.keys(getVisitorBirdItems(visitor)));
       for (const spotKey of SPOT_KEYS) {
         if (spotKey === currentSpot) continue;
         const totalInCollection = data.birdsBySpot[spotKey].length;
         const foundInCollection = data.birdsBySpot[spotKey].filter((b) => foundIds.has(b.id)).length;
         const siblingId = spotKeyToAssetId.get(spotKey) || null;
-        const otherCd = siblingId ? perScene.spotCooldowns?.[siblingId] : undefined;
-        const otherRemaining = otherCd
-          ? Math.max(0, otherCd.durationSeconds - Math.floor((now - otherCd.startedAt) / 1000))
-          : 0;
+        const otherRemaining = siblingId ? remainingSeconds(perScene.spotCooldowns?.[siblingId]) : 0;
         statuses.push({
           assetId: siblingId,
           spot: spotKey,

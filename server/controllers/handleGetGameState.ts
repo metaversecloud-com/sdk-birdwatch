@@ -13,8 +13,7 @@ import {
   getEcosystemBadges,
   invalidateInventoryCache,
 } from "@utils/index.js";
-import { emptyCollectionState } from "@utils/world/getWorld.js";
-import { emptyVisitorScene } from "@utils/visitor/getVisitor.js";
+import { emptyCollectionState, toCollectionView } from "@utils/world/getWorld.js";
 import { KeyAssetConfigError } from "@utils/droppedAssets/getKeyAsset.js";
 import { SpotAssetConfigError } from "@utils/droppedAssets/getSpotAsset.js";
 import type { GameStateResponse } from "@shared/types/index.js";
@@ -76,15 +75,31 @@ export const handleGetGameState = async (req: Request, res: Response) => {
 
     await ensureCollectionState(world, collectionId);
     await registerPlacedCollection(world, collectionId, sceneDropId);
-    const worldState = world.dataObject.collections?.[collectionId] || emptyCollectionState(collectionId);
+    const worldState = toCollectionView(world.dataObject.collections?.[collectionId] || emptyCollectionState());
     const adminSettings = world.dataObject.adminSettings!;
     const leaderboard = world.dataObject.leaderboard || {};
 
-    const { visitor, isAdmin, perScene } = await getVisitor(credentials, true, {
+    const { visitor, isAdmin } = await getVisitor(credentials, true, {
       includeInventory: true,
     });
 
     const badgeCatalog = await getEcosystemBadges(credentials).catch(() => ({}));
+
+    // Toast badges granted since the last open (queued by `awardBadges`), then clear the
+    // queue. Fire-and-forget: a failed toast must not block the queue clear or the response.
+    const pendingBadgeToasts = visitor.dataObject?.pendingBadgeToasts || [];
+    if (pendingBadgeToasts.length) {
+      for (const badgeName of pendingBadgeToasts) {
+        visitor
+          .fireToast({
+            groupId: `badge-${badgeName}`,
+            title: "Badge Awarded",
+            text: `You have earned the ${badgeName} badge!`,
+          })
+          .catch(() => console.error(`Failed to fire toast for the ${badgeName} badge.`));
+      }
+      await visitor.updateDataObject({ pendingBadgeToasts: [] }, {}).catch(() => undefined);
+    }
 
     const payload: GameStateResponse = {
       isAdmin,
@@ -93,11 +108,6 @@ export const handleGetGameState = async (req: Request, res: Response) => {
       adminSettings,
       worldState,
       leaderboard,
-      visitorScene: perScene || emptyVisitorScene(),
-      pendingBanners: {
-        milestone: undefined,
-        legendaryAlert: worldState.activeLegendaryAlert,
-      },
     };
 
     return res.json({

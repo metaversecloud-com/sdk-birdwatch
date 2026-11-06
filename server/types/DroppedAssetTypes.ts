@@ -22,7 +22,8 @@ export interface IWorld extends WorldInterface {
 
 export interface IVisitor extends VisitorInterface {
   // Flat: scene entries live at the top level, keyed by `${urlSlug}-${sceneDropId}`.
-  dataObject: Record<string, VisitorPerScene | undefined>;
+  // `pendingBadgeToasts` is the one non-scene key: badge names awaiting a toast on next open.
+  dataObject: Record<string, VisitorPerScene | string[] | undefined> & { pendingBadgeToasts?: string[] };
 }
 
 /** Each ecosystem/inventory catalog item we grant from. */

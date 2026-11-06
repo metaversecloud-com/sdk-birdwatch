@@ -20,7 +20,7 @@ export const handleResetBirdCount = async (req: Request, res: Response) => {
 
     const updates: DataObjectPatch = {};
     for (const collectionId of Object.keys(perCollection)) {
-      updates[`collections.${collectionId}`] = emptyCollectionState(collectionId);
+      updates[`collections.${collectionId}`] = emptyCollectionState();
     }
 
     if (Object.keys(updates).length === 0) {

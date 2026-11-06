@@ -6,6 +6,8 @@ export interface VisitorBirdItem {
   name: string;
   birdId?: string;
   icon: string;
+  /** Times this bird has been correctly identified (one unit granted per correct ID). */
+  quantity: number;
 }
 
 /**
@@ -28,7 +30,7 @@ const nameToBirdId: Record<string, string> = (() => {
 export const getVisitorBirdItems = (visitor: IVisitor): Record<string, VisitorBirdItem> => {
   const result: Record<string, VisitorBirdItem> = {};
   for (const vi of visitor.inventoryItems || []) {
-    const { id, item } = vi;
+    const { id, item, quantity } = vi;
     const name = item?.name;
     const type = item?.type;
     const icon = item?.image_url;
@@ -42,7 +44,7 @@ export const getVisitorBirdItems = (visitor: IVisitor): Record<string, VisitorBi
     const birdId = metaBirdId || (typeof name === "string" ? nameToBirdId[name.trim().toLowerCase()] : undefined);
     if (!birdId) continue;
 
-    result[birdId] = { id, name: name || "", birdId, icon: icon || "" };
+    result[birdId] = { id, name: name || "", birdId, icon: icon || "", quantity: quantity || 0 };
   }
   return result;
 };

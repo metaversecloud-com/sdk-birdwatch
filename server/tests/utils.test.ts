@@ -1,7 +1,7 @@
 import { rollBirdForSpot, effectiveWeight } from "../utils/dropTable";
 import { pickChoices } from "../utils/pickChoices";
 import { encodeEntry, decodeEntry, parseLeaderboard, upsertEntry } from "../utils/leaderboard";
-import { detectMilestoneCross, applyMilestone } from "../utils/milestones";
+import { detectMilestoneCross, milestoneStateFor } from "../utils/milestones";
 import { computeMostSpotted } from "../utils/mostSpotted";
 import { etDayKey, pickTodayPuzzle, stableShuffleCandidateIds } from "../utils/mysteryBird/pickTodayPuzzle";
 import { COLLECTIONS } from "../data/collections/index";
@@ -91,11 +91,12 @@ describe("milestones", () => {
     expect(detectMilestoneCross(500, 501)).toBeUndefined();
   });
 
-  test("applyMilestone unlocks the right flags", () => {
-    const base = { rareBoostUnlocked: false, legendaryBoostUnlocked: false, championBadgeUnlocked: false };
-    expect(applyMilestone(base, "m1").rareBoostUnlocked).toBe(true);
-    expect(applyMilestone(base, "m2").legendaryBoostUnlocked).toBe(true);
-    expect(applyMilestone(base, "m3").championBadgeUnlocked).toBe(true);
+  test("milestoneStateFor derives flags from the World Bird Count", () => {
+    expect(milestoneStateFor(0)).toEqual({ rareBoostUnlocked: false, legendaryBoostUnlocked: false, championBadgeUnlocked: false });
+    expect(milestoneStateFor(500).rareBoostUnlocked).toBe(true);
+    expect(milestoneStateFor(1500).legendaryBoostUnlocked).toBe(true);
+    expect(milestoneStateFor(2499).championBadgeUnlocked).toBe(false);
+    expect(milestoneStateFor(2500).championBadgeUnlocked).toBe(true);
   });
 });
 

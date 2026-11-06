@@ -45,6 +45,7 @@ const seedKeyAsset = () => {
 describe("Birdwatch routes", () => {
   beforeEach(() => {
     topiaMock.reset();
+    require("../utils/inventory/inventoryCache").invalidateInventoryCache("test-key");
     seedKeyAsset();
   });
 
@@ -76,8 +77,7 @@ describe("Birdwatch routes", () => {
     const res = await request(makeApp()).post("/api/sightings/start").query(spotCreds);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
-    expect(res.body.data.sighting.assetId).toBe("asset-spot-feeder");
-    expect(res.body.data.sighting.spotKey).toBe("feeder");
+    expect(res.body.data.sighting.collectionId).toBe("north_american_winter_birds");
     expect(res.body.data.sighting.choiceBirdIds).toHaveLength(3);
   });
 
@@ -86,18 +86,12 @@ describe("Birdwatch routes", () => {
     // Seed a fake in-flight so resolve has something to validate against.
     topiaMock.visitorSeed = {
       "world-scene-1": {
-        collections: {},
-        spotCooldowns: {
-          "asset-spot-feeder": { startedAt: Date.now(), durationSeconds: 60 },
-        },
+        spotCooldowns: { "asset-spot-feeder": Date.now() + 60_000 },
         inFlight: {
           "asset-spot-feeder": {
-            assetId: "asset-spot-feeder",
-            spotKey: "feeder",
             collectionId: "north_american_winter_birds",
             birdId: "northern_cardinal",
             choiceBirdIds: ["black_capped_chickadee", "northern_cardinal", "house_finch"],
-            rolledAt: Date.now(),
           },
         },
       },
@@ -109,6 +103,40 @@ describe("Birdwatch routes", () => {
     expect(res.status).toBe(200);
     expect(res.body.data.outcome).toBe("wrong");
     expect(res.body.data.rightBird.id).toBe("northern_cardinal");
+  });
+
+  test("POST /sightings/resolve correct pick adds +1 species item and counts from inventory", async () => {
+    const spotCreds = { ...CREDS, assetId: "asset-spot-feeder", uniqueName: "Birdwatch_spot" };
+    topiaMock.ecosystemItems = [{ id: "item-cardinal", name: "Northern Cardinal", type: "ITEM" }];
+    // Already in the Field Guide with quantity 2 → this pick is a repeat, spotted 3 times.
+    topiaMock.visitorInventoryItems = [
+      { id: "ui-1", quantity: 2, item: { name: "Northern Cardinal", type: "ITEM", metadata: { birdId: "northern_cardinal" } } },
+    ];
+    topiaMock.visitorSeed = {
+      "world-scene-1": {
+        spotCooldowns: {},
+        inFlight: {
+          "asset-spot-feeder": {
+            collectionId: "north_american_winter_birds",
+            birdId: "northern_cardinal",
+            choiceBirdIds: ["black_capped_chickadee", "northern_cardinal", "house_finch"],
+          },
+        },
+      },
+    };
+    const res = await request(makeApp())
+      .post("/api/sightings/resolve")
+      .query(spotCreds)
+      .send({ pickedBirdId: "northern_cardinal" });
+    expect(res.status).toBe(200);
+    expect(res.body.data.outcome).toBe("repeat");
+    expect(res.body.data.timesSpotted).toBe(3);
+    expect(res.body.data.yourSpeciesCount).toBe(1);
+    await new Promise((r) => setTimeout(r, 10));
+    expect(topiaMock.modifyInventoryItemQuantity).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "Northern Cardinal" }),
+      1,
+    );
   });
 
   test("POST /admin/settings rejects non-admins", async () => {
@@ -150,7 +178,6 @@ describe("Birdwatch routes", () => {
 
     topiaMock.visitorSeed = {
       "world-scene-1": {
-        collections: {},
         spotCooldowns: {},
         mysteryBird: {
           [collection.id]: {
@@ -158,11 +185,8 @@ describe("Birdwatch routes", () => {
             puzzleId: puzzle.id,
             guessesUsed: 0,
             solved: false,
-            solvedOnFirstTry: false,
             solvedTotal: 0,
             firstTryTotal: 0,
-            openedCards: {},
-            openedBirdCards: [],
             seenPuzzleIds: [puzzle.id],
           },
         },

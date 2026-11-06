@@ -49,43 +49,45 @@ All endpoints accept the standard Topia iframe credentials via query params; `fo
 
 ## Data Objects
 
-### World data object (`world.dataObject.birdwatch`)
+Anything the visitor's inventory can answer is **not** stored in a data object. The Field Guide is the visitor's species inventory items: one unit is added per correct ID, so an item's quantity is "times spotted", and the sum of quantities is the lifetime correct-ID count. Badges, "new species", times spotted and the leaderboard species count are all derived from it.
+
+### World data object (flat, no app wrapper)
 
 ```ts
 interface WorldState {
-  perCollection: Record<string, CollectionWorldState>;
-  worldWide: {
-    leaderboard: Record<profileId, "displayName|speciesCount|reachedAt">; // pipe-concat strings keep the record small
-    placedCollectionsBySceneDropId: Record<collectionId, sceneDropId>; // "which Collections are placed in this world"
-  };
   adminSettings: { identificationMode; cooldownSeconds; allAboutBirdsLinksEnabled };
+  collections: Record<collectionId, CollectionWorldState>;
+  leaderboard: Record<profileId, "displayName|speciesCount|reachedAt">; // pipe-concat strings keep the record small
 }
 
 interface CollectionWorldState {
-  collectionId: string;
-  totalSightings: number;
+  sceneDropId?: string; // scene the Collection is placed in
+  totalSightings: number; // World Bird Count
   perBirdSightings: Record<birdId, count>;
   perPlayerContribution: Record<profileId, count>; // keys are the participants list for Champion Birder on M3
-  milestones: { rareBoostUnlocked; legendaryBoostUnlocked; championBadgeUnlocked };
-  mostSpotted: { birdId; count }[]; // top 3
-  rarestSighting?: { birdId; rarity; byDisplayName; bySightingAt };
-  activeLegendaryAlert?: { alertId; birdId; spot; firedAt; byProfileId; byDisplayName };
+  rarestSighting?: { birdId; byDisplayName };
+  activeLegendaryAlert?: { alertId; birdId; spot; firedAt };
 }
 ```
 
-### Visitor data object (`visitor.dataObject.birdwatch.perScene[${urlSlug}-${sceneDropId}]`)
+`milestones` and `mostSpotted` are derived from `totalSightings` / `perBirdSightings` on read (`toCollectionView`) and never stored.
+
+### Visitor data object (flat, scene entries keyed by `${urlSlug}-${sceneDropId}`)
 
 ```ts
+interface VisitorDataObject {
+  [sceneKey: string]: VisitorPerScene;
+  pendingBadgeToasts?: string[]; // badge names toasted (then cleared) on the next /game-state
+}
+
 interface VisitorPerScene {
-  collections: Record<
-    collectionId,
-    { birdRecords: Record<birdId, { firstSpottedAt; timesSpotted }>; milestoneBannerSeen }
-  >;
-  spotCooldowns: Record<assetId, { startedAt; durationSeconds }>;
-  inFlight?: Record<assetId, VisitorInFlightSighting>;
-  perWorldSpeciesReachedAt?: number; // leaderboard tiebreak
+  spotCooldowns: Record<assetId, number>; // cooldown end time (ms)
+  inFlight?: Record<assetId, { collectionId; birdId; choiceBirdIds }>; // entry removed on resolve
   legendaryAlertUsage?: { alertId; usedAssetIds };
-  mysteryBird?: Record<collectionId, VisitorMysteryBirdState>;
+  mysteryBird?: Record<
+    collectionId,
+    { todayKey; puzzleId; guessesUsed; solved; solvedTotal; firstTryTotal; seenPuzzleIds }
+  >;
 }
 ```
 
@@ -94,9 +96,9 @@ Keying by `${urlSlug}-${sceneDropId}` lets one visitor's data cover multiple Bir
 ### Asset data objects
 
 ```ts
-// keyAsset.dataObject.birdwatch   = { collectionId }
-// spotAsset.dataObject.birdwatch  = { collectionId, spot }
-// trophy.dataObject.birdwatch     = {} (no app state)
+// keyAsset.dataObject  = { collectionId }
+// spotAsset.dataObject = { collectionId, spot }
+// trophy.dataObject    = {} (no app state)
 ```
 
 Scene siblings are found via `sceneDropId` queries, not stored links.

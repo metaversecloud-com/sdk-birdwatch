@@ -43,6 +43,7 @@ const applyDotPatch = (into: any, patch: any): any => {
 };
 
 export const fireToast = jest.fn().mockResolvedValue({ success: true });
+export const modifyInventoryItemQuantity = jest.fn().mockResolvedValue({});
 
 export class Topia {
   constructor(_opts: any) {}
@@ -70,17 +71,18 @@ export class EcosystemFactory {
   constructor(_topia: any) {}
   create(_opts: any) {
     return {
-      getEcosystemItemsByOwner: jest.fn().mockResolvedValue((__mock as any).ecosystemItems || []),
+      inventoryItems: (__mock as any).ecosystemItems || [],
+      fetchInventoryItems: jest.fn().mockResolvedValue(undefined),
     };
   }
 }
 
 export class UserFactory {
   constructor(_topia: any) {}
-  async create(args: any) {
+  create(args: any) {
     (__mock as any).lastUserCreate = args;
     const u = makeDataHolder({});
-    (u as any).grantEcosystemItem = jest.fn().mockResolvedValue({ success: true });
+    (u as any).grantInventoryItem = jest.fn().mockResolvedValue({});
     return u;
   }
 }
@@ -102,7 +104,9 @@ export class VisitorFactory {
       isAdmin: withDetails ? (__mock as any).visitorIsAdmin ?? false : undefined,
       inventoryItems: (__mock as any).visitorInventoryItems || [],
       fetchInventoryItems: jest.fn().mockResolvedValue(undefined),
-      grantEcosystemItem: jest.fn().mockResolvedValue({ success: true }),
+      grantInventoryItem: jest.fn().mockResolvedValue({}),
+      modifyInventoryItemQuantity: modifyInventoryItemQuantity,
+      fireToast,
     };
   }
 }
@@ -133,6 +137,7 @@ export class WorldActivityFactory {
 
 export const __mock = {
   fireToast,
+  modifyInventoryItemQuantity,
   lastWorldCreateArgs: null as any,
   lastUserCreate: null as any,
   droppedAssetSeed: {} as Record<string, any>,
@@ -145,6 +150,7 @@ export const __mock = {
   sceneAssets: [] as any[],
   reset(this: any) {
     fireToast.mockClear();
+    modifyInventoryItemQuantity.mockClear();
     this.lastWorldCreateArgs = null;
     this.lastUserCreate = null;
     this.droppedAssetSeed = {};

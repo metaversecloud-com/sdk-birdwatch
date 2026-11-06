@@ -3,13 +3,14 @@ import {
   errorHandler,
   getVisitor,
   getCredentials,
-  awardBadge,
+  awardBadges,
+  getVisitorBadges,
   MYSTERY_BADGES,
   etDayKey,
   pickTodayPuzzle,
   stableShuffleCandidateIds,
 } from "@utils/index.js";
-import type { VisitorMysteryBirdState } from "@shared/types/index.js";
+import type { VisitorMysteryBirdState, VisitorPerScene } from "@shared/types/index.js";
 import { sceneKey } from "@shared/types/index.js";
 import { getCollectionData } from "../data/collections/index.js";
 
@@ -23,11 +24,8 @@ const emptyMystery = (todayKey: string, puzzleId: string): VisitorMysteryBirdSta
   puzzleId,
   guessesUsed: 0,
   solved: false,
-  solvedOnFirstTry: false,
   solvedTotal: 0,
   firstTryTotal: 0,
-  openedCards: {},
-  openedBirdCards: [],
   seenPuzzleIds: [],
 });
 
@@ -83,11 +81,13 @@ export const handleMysteryGuess = async (req: Request, res: Response) => {
 
     const isCorrect = pickedBirdId === puzzle.answerId;
     const guessesUsed = state.guessesUsed + 1;
+    // Built field-by-field (no spread) so legacy fields on older records aren't carried forward.
     const nextState: VisitorMysteryBirdState = {
-      ...state,
+      todayKey: state.todayKey,
+      puzzleId: state.puzzleId,
+      seenPuzzleIds: state.seenPuzzleIds || [],
       guessesUsed,
       solved: isCorrect,
-      solvedOnFirstTry: isCorrect && state.guessesUsed === 0,
       solvedTotal: isCorrect ? state.solvedTotal + 1 : state.solvedTotal,
       firstTryTotal: isCorrect && state.guessesUsed === 0 ? state.firstTryTotal + 1 : state.firstTryTotal,
     };
@@ -101,17 +101,35 @@ export const handleMysteryGuess = async (req: Request, res: Response) => {
       },
     );
 
-    // Badges on solve. Fire-and-forget: the next /game-state?forceRefreshInventory=true
-    // picks up any newly-granted badge, so we don't block the guess response on it.
-    const tryAward = (name: string) => {
-      awardBadge(credentials, profileId, name).catch(() => undefined);
-    };
+    // Badges on solve. Fire-and-forget: the next /game-state picks up any newly-granted
+    // badge and fires its toast, so we don't block the guess response on it.
+    // Mystery badges count across every scene and Collection, so totals are summed over the
+    // whole visitor data object, with this scene + Collection's entry replaced by nextState.
     if (isCorrect) {
-      if (nextState.solvedTotal >= 1) tryAward(MYSTERY_BADGES.mysterySolved);
-      if (nextState.solvedTotal >= 5) tryAward(MYSTERY_BADGES.sharpEye);
-      if (nextState.solvedTotal >= 15) tryAward(MYSTERY_BADGES.birdDetective);
-      if (nextState.solvedTotal >= 30) tryAward(MYSTERY_BADGES.mysteryMaster);
-      if (nextState.firstTryTotal >= 1) tryAward(MYSTERY_BADGES.firstTry);
+      let solvedTotal = nextState.solvedTotal;
+      let firstTryTotal = nextState.firstTryTotal;
+      for (const [sKey, value] of Object.entries(visitor.dataObject || {})) {
+        const scene = value as VisitorPerScene | undefined;
+        if (!scene || typeof scene !== "object" || !scene.mysteryBird) continue;
+        for (const [cId, m] of Object.entries(scene.mysteryBird)) {
+          if (sKey === key && cId === collectionId) continue;
+          solvedTotal += m?.solvedTotal || 0;
+          firstTryTotal += m?.firstTryTotal || 0;
+        }
+      }
+
+      const badgesToAward: string[] = [];
+      if (solvedTotal >= 1) badgesToAward.push(MYSTERY_BADGES.mysterySolved);
+      if (solvedTotal >= 5) badgesToAward.push(MYSTERY_BADGES.sharpEye);
+      if (solvedTotal >= 15) badgesToAward.push(MYSTERY_BADGES.birdDetective);
+      if (solvedTotal >= 30) badgesToAward.push(MYSTERY_BADGES.mysteryMaster);
+      if (firstTryTotal >= 1) badgesToAward.push(MYSTERY_BADGES.firstTry);
+      const ownedBadges = getVisitorBadges(visitor);
+      awardBadges(
+        credentials,
+        profileId,
+        badgesToAward.filter((name) => !ownedBadges[name]),
+      ).catch((error) => console.error("handleMysteryGuess: awardBadges failed", error));
     }
 
     return res.json({

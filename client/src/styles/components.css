@@ -1,8 +1,13 @@
 /* Birdwatch app-specific component styles. Prefix: bw- */
 
+html {
+  min-height: 100%;
+}
+
 body {
   background: radial-gradient(1200px 800px at 80% -5%, var(--bw-bg-1), transparent 30%),
     radial-gradient(1200px 1420px at -30% 90%, var(--bw-bg-2), transparent 50%), var(--bw-bg-3);
+  background-repeat: no-repeat;
   color: var(--bw-ink);
 }
 

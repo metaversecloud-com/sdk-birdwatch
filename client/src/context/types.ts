@@ -20,7 +20,7 @@ export type InteractiveParams = {
 };
 
 export type VisitorBadge = { id: string; name: string; icon: string };
-export type VisitorBirdItem = { id: string; name: string; birdId?: string; icon: string };
+export type VisitorBirdItem = { id: string; name: string; birdId?: string; icon: string; quantity: number };
 export type EcosystemBadge = { id: string; name: string; icon: string; description: string };
 
 export interface InitialState {

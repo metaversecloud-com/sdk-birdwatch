@@ -1,4 +1,4 @@
-import type { Rarity, SpotKey } from "./BirdTypes.js";
+import type { SpotKey } from "./BirdTypes.js";
 
 export type IdentificationMode = "description" | "picture_match";
 
@@ -38,9 +38,7 @@ export interface MostSpotted {
 
 export interface RarestSighting {
   birdId: string;
-  rarity: Rarity;
   byDisplayName: string;
-  bySightingAt: number;
 }
 
 export interface LegendaryAlert {
@@ -48,20 +46,22 @@ export interface LegendaryAlert {
   birdId: string;
   spot: SpotKey;
   firedAt: number;
-  byProfileId: string;
-  byDisplayName: string;
 }
 
+/** Stored on the world data object, per Collection. */
 export interface CollectionWorldState {
-  collectionId: string;
   sceneDropId?: string;
   totalSightings: number;
   perBirdSightings: Record<string, number>;
   perPlayerContribution: Record<string, number>;
-  milestones: MilestoneState;
-  mostSpotted: MostSpotted[];
   rarestSighting?: RarestSighting;
   activeLegendaryAlert?: LegendaryAlert;
+}
+
+/** CollectionWorldState plus values derived on read (never stored). */
+export interface CollectionWorldStateView extends CollectionWorldState {
+  milestones: MilestoneState;
+  mostSpotted: MostSpotted[];
 }
 
 export type LeaderboardEntryString = string;
@@ -72,29 +72,10 @@ export interface WorldState {
   leaderboard: Record<string, LeaderboardEntryString>;
 }
 
-export interface VisitorBirdRecord {
-  firstSpottedAt: number;
-  timesSpotted: number;
-}
-
-export interface VisitorCollectionData {
-  birdRecords: Record<string, VisitorBirdRecord>;
-  milestoneBannerSeen: Partial<Record<"m1" | "m2" | "m3", boolean>>;
-}
-
-export interface VisitorSpotCooldown {
-  startedAt: number;
-  durationSeconds: CooldownOption;
-}
-
 export interface VisitorInFlightSighting {
-  assetId: string;
-  spotKey: SpotKey;
   collectionId: string;
   birdId: string;
   choiceBirdIds: [string, string, string];
-  rolledAt: number;
-  isLegendarySkip?: boolean;
 }
 
 export interface VisitorLegendaryAlertUsage {
@@ -107,19 +88,19 @@ export interface VisitorMysteryBirdState {
   puzzleId: string;
   guessesUsed: number;
   solved: boolean;
-  solvedOnFirstTry: boolean;
   solvedTotal: number;
   firstTryTotal: number;
-  openedCards: Partial<Record<"clue1" | "clue2" | "clue3", true>>;
-  openedBirdCards: string[];
   seenPuzzleIds: string[];
 }
 
+/**
+ * Per-scene visitor state. Anything the Field Guide (species inventory items) can answer,
+ * like species found or times spotted, is NOT stored here: inventory is the source of truth.
+ */
 export interface VisitorPerScene {
-  collections: Record<string, VisitorCollectionData>;
-  spotCooldowns: Record<string, VisitorSpotCooldown>;
+  /** assetId → cooldown end time (ms). */
+  spotCooldowns: Record<string, number>;
   inFlight?: Record<string, VisitorInFlightSighting>;
-  perWorldSpeciesReachedAt?: number;
   legendaryAlertUsage?: VisitorLegendaryAlertUsage;
   mysteryBird?: Record<string, VisitorMysteryBirdState>;
 }
@@ -131,11 +112,6 @@ export interface GameStateResponse {
   collectionId: string;
   sceneDropId: string;
   adminSettings: AdminSettings;
-  worldState: CollectionWorldState;
+  worldState: CollectionWorldStateView;
   leaderboard: Record<string, LeaderboardEntryString>;
-  visitorScene: VisitorPerScene;
-  pendingBanners: {
-    milestone?: "m1" | "m2" | "m3";
-    legendaryAlert?: LegendaryAlert;
-  };
 }

@@ -136,7 +136,7 @@ export const WorldBirdCountTab = ({ onOpenFieldGuide }: { onOpenFieldGuide: () =
           )}
           {milestones.map((m) => (
             <div key={m.total} className={`grid gap-2 bw-milestone${m.reached ? " bw-milestone--reached" : ""}`}>
-              <strong>{m.total.toLocaleString()}</strong>
+              <strong className="min-w-[45px]">{m.total.toLocaleString()}</strong>
               <div>
                 {m.label}
                 <div className="bw-caption ml-auto">
@@ -154,7 +154,7 @@ export const WorldBirdCountTab = ({ onOpenFieldGuide }: { onOpenFieldGuide: () =
           <div className="flex items-center gap-2 mt-2">
             <BirdToken
               birdId={ws.rarestSighting.birdId}
-              rarity={ws.rarestSighting.rarity}
+              rarity={nawbById[ws.rarestSighting.birdId]?.rarity}
               src={discoveredBirdImage(ws.rarestSighting.birdId)}
               alt={nawbById[ws.rarestSighting.birdId]?.name}
             />
