@@ -21,6 +21,7 @@ export type InteractiveParams = {
 
 export type VisitorBadge = { id: string; name: string; icon: string };
 export type VisitorBirdItem = { id: string; name: string; birdId?: string; icon: string };
+export type EcosystemBadge = { id: string; name: string; icon: string; description: string };
 
 export interface InitialState {
   isAdmin?: boolean;
@@ -29,6 +30,7 @@ export interface InitialState {
   gameState?: GameStateResponse;
   visitorInventory?: Record<string, VisitorBadge>;
   visitorBirdItems?: Record<string, VisitorBirdItem>;
+  badgeCatalog?: Record<string, EcosystemBadge>;
   profileId?: string;
   displayName?: string;
 }

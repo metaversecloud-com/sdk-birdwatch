@@ -13,14 +13,14 @@ export interface ITrophyAsset extends DroppedAssetInterface {
   dataObject: Record<string, never>;
 }
 
-export type IBirdwatchAsset = IKeyAsset | ISpotAsset | ITrophyAsset;
+export type IAsset = IKeyAsset | ISpotAsset | ITrophyAsset;
 
-export interface IBirdwatchWorld extends WorldInterface {
+export interface IWorld extends WorldInterface {
   // Flat: no `birdwatch` wrapper. WorldState lives at the top level.
   dataObject: Partial<WorldState>;
 }
 
-export interface IBirdwatchVisitor extends VisitorInterface {
+export interface IVisitor extends VisitorInterface {
   // Flat: scene entries live at the top level, keyed by `${urlSlug}-${sceneDropId}`.
   dataObject: Record<string, VisitorPerScene | undefined>;
 }

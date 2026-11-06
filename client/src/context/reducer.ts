@@ -15,6 +15,7 @@ const globalReducer = (state: InitialState, action: ActionType) => {
         gameState: payload.gameState,
         visitorInventory: payload.visitorInventory,
         visitorBirdItems: payload.visitorBirdItems,
+        badgeCatalog: payload.badgeCatalog,
         profileId: payload.profileId,
         displayName: payload.displayName,
         error: "",

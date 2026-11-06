@@ -1,5 +1,5 @@
 import type { Credentials } from "../../types/index.js";
-import type { DataObjectPatch, IBirdwatchWorld } from "../../types/DroppedAssetTypes.js";
+import type { DataObjectPatch, IWorld } from "../../types/DroppedAssetTypes.js";
 import type { WorldState, CollectionWorldState } from "@shared/types/index.js";
 import { DEFAULT_ADMIN_SETTINGS } from "@shared/types/index.js";
 import { World } from "../topiaInit.js";
@@ -25,9 +25,9 @@ export const emptyWorldState = (): WorldState => ({
  * Fetch and initialize the world data object.
  * A Collection's placement is recorded as `collections[collectionId].sceneDropId`.
  */
-export const getBirdwatchWorld = async (credentials: Credentials): Promise<IBirdwatchWorld> => {
+export const getWorld = async (credentials: Credentials): Promise<IWorld> => {
   try {
-    const world = World.create(credentials.urlSlug, { credentials }) as unknown as IBirdwatchWorld;
+    const world = World.create(credentials.urlSlug, { credentials }) as unknown as IWorld;
     await world.fetchDataObject();
 
     const current = world.dataObject;
@@ -54,7 +54,7 @@ export const getBirdwatchWorld = async (credentials: Credentials): Promise<IBird
 };
 
 export const ensureCollectionState = async (
-  world: IBirdwatchWorld,
+  world: IWorld,
   collectionId: string,
 ): Promise<CollectionWorldState> => {
   const state = world.dataObject?.collections?.[collectionId];
@@ -71,7 +71,7 @@ export const ensureCollectionState = async (
  * Writes directly onto the Collection's own entry — no separate lookup map.
  */
 export const registerPlacedCollection = async (
-  world: IBirdwatchWorld,
+  world: IWorld,
   collectionId: string,
   sceneDropId: string,
 ): Promise<void> => {

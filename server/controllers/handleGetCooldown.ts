@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import {
   errorHandler,
-  getBirdwatchVisitor,
-  getBirdwatchWorld,
+  getVisitor,
+  getWorld,
   getSceneSiblings,
   getSpotAsset,
   getCredentials,
@@ -46,8 +46,8 @@ export const handleGetCooldown = async (req: Request, res: Response) => {
     const credentials = getCredentials(req.query);
     const { assetId } = credentials;
 
-    const world = await getBirdwatchWorld(credentials);
-    const { perScene } = await getBirdwatchVisitor(credentials, false);
+    const world = await getWorld(credentials);
+    const { perScene } = await getVisitor(credentials, false);
 
     // Pin down the current spot's Collection — fall back to the first registered Collection
     // (handles the case where the asset's data object hasn't been initialized yet).

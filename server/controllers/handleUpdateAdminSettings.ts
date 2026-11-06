@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { errorHandler, getBirdwatchVisitor, getBirdwatchWorld, getCredentials } from "@utils/index.js";
+import { errorHandler, getVisitor, getWorld, getCredentials } from "@utils/index.js";
 import type { AdminSettings, IdentificationMode, CooldownOption } from "@shared/types/index.js";
 import type { DataObjectPatch } from "../types/DroppedAssetTypes.js";
 import { COOLDOWN_OPTIONS } from "@shared/types/index.js";
@@ -11,7 +11,7 @@ const isCooldown = (v: unknown): v is CooldownOption =>
 export const handleUpdateAdminSettings = async (req: Request, res: Response) => {
   try {
     const credentials = getCredentials(req.query);
-    const { isAdmin } = await getBirdwatchVisitor(credentials, true);
+    const { isAdmin } = await getVisitor(credentials, true);
     if (!isAdmin) return res.status(403).json({ success: false, message: "Admin only" });
 
     const body = (req.body || {}) as Partial<AdminSettings>;
@@ -35,7 +35,7 @@ export const handleUpdateAdminSettings = async (req: Request, res: Response) => 
       return res.status(400).json({ success: false, message: "No valid settings provided" });
     }
 
-    const world = await getBirdwatchWorld(credentials);
+    const world = await getWorld(credentials);
     await world.updateDataObject(updates, {});
     const adminSettings = world.dataObject.adminSettings as AdminSettings;
 

@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import {
   errorHandler,
-  getBirdwatchVisitor,
-  getBirdwatchWorld,
+  getVisitor,
+  getWorld,
   getCredentials,
   ensureCollectionState,
   computeMostSpotted,
@@ -54,7 +54,7 @@ export const handleResolveSighting = async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, message: "pickedBirdId is required" });
     }
 
-    const { visitor, perScene } = await getBirdwatchVisitor(credentials, true, { includeInventory: true });
+    const { visitor, perScene } = await getVisitor(credentials, true, { includeInventory: true });
     const inFlight = perScene.inFlight?.[assetId];
     if (!inFlight) {
       return res.status(400).json({ success: false, message: "No in-flight sighting for this spot." });
@@ -69,7 +69,7 @@ export const handleResolveSighting = async (req: Request, res: Response) => {
     const pickedBird = data.birdsById[pickedBirdId];
     const isCorrect = pickedBirdId === inFlight.birdId;
 
-    const world = await getBirdwatchWorld(credentials);
+    const world = await getWorld(credentials);
     await ensureCollectionState(world, inFlight.collectionId);
     const worldData = world.dataObject;
     const collectionState = worldData.collections![inFlight.collectionId];

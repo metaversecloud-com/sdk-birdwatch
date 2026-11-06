@@ -1,5 +1,5 @@
 import type { Credentials } from "../../types/index.js";
-import type { IBirdwatchVisitor } from "../../types/DroppedAssetTypes.js";
+import type { IVisitor } from "../../types/DroppedAssetTypes.js";
 import type { VisitorPerScene } from "@shared/types/index.js";
 import { sceneKey } from "@shared/types/index.js";
 import { Visitor } from "../topiaInit.js";
@@ -15,7 +15,7 @@ export const emptyVisitorScene = (): VisitorPerScene => ({
  * Scene entries live at the top level of the visitor dataObject, keyed by
  * `${urlSlug}-${sceneDropId}`.
  */
-export const getBirdwatchVisitor = async (
+export const getVisitor = async (
   credentials: Credentials,
   shouldGetVisitorDetails = true,
   options: { includeInventory?: boolean } = {},
@@ -25,7 +25,7 @@ export const getBirdwatchVisitor = async (
 
     const visitor = (shouldGetVisitorDetails
       ? await Visitor.get(visitorId, urlSlug, { credentials })
-      : Visitor.create(visitorId, urlSlug, { credentials })) as unknown as IBirdwatchVisitor;
+      : Visitor.create(visitorId, urlSlug, { credentials })) as unknown as IVisitor;
     if (!visitor) throw new Error("Visitor not found");
 
     await visitor.fetchDataObject();

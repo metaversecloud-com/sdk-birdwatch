@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import {
   errorHandler,
-  getBirdwatchVisitor,
-  getBirdwatchWorld,
+  getVisitor,
+  getWorld,
   getCredentials,
   emptyCollectionState,
 } from "@utils/index.js";
@@ -12,10 +12,10 @@ import type { DataObjectPatch } from "../types/DroppedAssetTypes.js";
 export const handleResetBirdCount = async (req: Request, res: Response) => {
   try {
     const credentials = getCredentials(req.query);
-    const { isAdmin } = await getBirdwatchVisitor(credentials, true);
+    const { isAdmin } = await getVisitor(credentials, true);
     if (!isAdmin) return res.status(403).json({ success: false, message: "Admin only" });
 
-    const world = await getBirdwatchWorld(credentials);
+    const world = await getWorld(credentials);
     const perCollection: Record<string, CollectionWorldState> = world.dataObject.collections || {};
 
     const updates: DataObjectPatch = {};

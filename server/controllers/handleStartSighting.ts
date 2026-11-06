@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import {
   errorHandler,
-  getBirdwatchVisitor,
-  getBirdwatchWorld,
+  getVisitor,
+  getWorld,
   getSpotAsset,
   getCredentials,
   ensureCollectionState,
@@ -36,12 +36,12 @@ export const handleStartSighting = async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, message: "Spot asset is misconfigured." });
     }
 
-    const world = await getBirdwatchWorld(credentials);
+    const world = await getWorld(credentials);
     await ensureCollectionState(world, spotMeta.collectionId);
     const collectionState = world.dataObject.collections?.[spotMeta.collectionId];
     const adminSettings = world.dataObject.adminSettings;
 
-    const { visitor, perScene } = await getBirdwatchVisitor(credentials, false);
+    const { visitor, perScene } = await getVisitor(credentials, false);
     const now = Date.now();
     const key = sceneKey(urlSlug, sceneDropId);
     const existingInFlight = perScene.inFlight?.[assetId];

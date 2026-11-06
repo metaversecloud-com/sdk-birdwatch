@@ -11,6 +11,7 @@ export const setGameState = (dispatch: Dispatch<ActionType> | null, response: an
       isAdmin: response?.data?.isAdmin,
       visitorInventory: response?.visitorInventory,
       visitorBirdItems: response?.visitorBirdItems,
+      badgeCatalog: response?.badgeCatalog,
       profileId: response?.profileId,
       displayName: response?.displayName,
     },

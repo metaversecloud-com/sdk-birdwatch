@@ -119,7 +119,7 @@ export interface MysteryPuzzle {
 }
 ```
 
-#### `shared/types/BirdwatchGameTypes.ts`
+#### `shared/types/GameTypes.ts`
 
 ```typescript
 export type IdentificationMode = "description" | "picture_match";
@@ -242,7 +242,7 @@ export interface VisitorPerScene {
   mysteryBird?: Record<string, VisitorMysteryBirdState>; // per collectionId — v1 stretch
 }
 
-export interface BirdwatchVisitorDataObject {
+export interface VisitorDataObject {
   // Full visitor data object shape under a top-level `birdwatch` namespace.
   birdwatch: {
     perScene: Record<string, VisitorPerScene>; // key = `${urlSlug}-${sceneDropId}`
@@ -256,7 +256,7 @@ All world state (per-Collection + cross-Collection) lives on the **`World` data 
 
 ```typescript
 // World dataObject.birdwatch (persistent world state)
-export interface BirdwatchWorldState {
+export interface WorldState {
   perCollection: Record<string, CollectionWorldState>; // keyed by collectionId
   worldWide: WorldWideState; // leaderboard + placedCollectionsBySceneDropId
   adminSettings: AdminSettings; // one setting block per world (applies to every Collection)

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import {
   errorHandler,
-  getBirdwatchVisitor,
+  getVisitor,
   getCredentials,
   awardBadge,
   MYSTERY_BADGES,
@@ -52,7 +52,7 @@ export const handleMysteryGuess = async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, message: "No Mystery Bird puzzles for this collection" });
     }
 
-    const { visitor, perScene } = await getBirdwatchVisitor(credentials, true, { includeInventory: true });
+    const { visitor, perScene } = await getVisitor(credentials, true, { includeInventory: true });
     const todayKey = etDayKey();
     const key = sceneKey(urlSlug, sceneDropId);
     let state = perScene.mysteryBird?.[collectionId];

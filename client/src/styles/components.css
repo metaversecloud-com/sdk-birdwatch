@@ -6,26 +6,10 @@ body {
   color: var(--bw-ink);
 }
 
-.bw-page {
-  max-width: 420px;
-  margin: 0 auto;
-  padding: 1rem;
-  min-height: 100vh;
-}
-
-.bw-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
 .bw-title {
-  font-size: 1.5rem;
-  font-weight: 800;
-  letter-spacing: -0.01em;
+  font-size: 1.1rem;
+  font-weight: 600;
   color: var(--bw-ink);
-  margin: 0;
 }
 
 .bw-subtitle {
@@ -237,22 +221,27 @@ body {
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 700;
+  border: 1px solid transparent;
 }
 .bw-chip--common {
   background: var(--bw-common-soft);
   color: var(--bw-common);
+  border-color: var(--bw-common);
 }
 .bw-chip--uncommon {
   background: var(--bw-uncommon-soft);
   color: var(--bw-uncommon);
+  border-color: var(--bw-uncommon);
 }
 .bw-chip--rare {
   background: var(--bw-rare-soft);
   color: var(--bw-rare);
+  border-color: var(--bw-rare);
 }
 .bw-chip--legendary {
   background: var(--bw-legendary-soft);
   color: var(--bw-legendary);
+  border-color: var(--bw-legendary);
 }
 .bw-chip--new {
   background: var(--bw-warn);
@@ -260,6 +249,7 @@ body {
   font-size: 0.7rem;
   padding: 0.25rem 0.7rem;
   letter-spacing: 0.04em;
+  border-color: var(--bw-warn);
 }
 
 /* Bird token: circular, rarity-rim, star band */
@@ -504,12 +494,12 @@ body {
   border: 1px solid var(--bw-cloud);
 }
 .bw-row--me {
-  border-color: var(--bw-primary);
-  background: var(--bw-primary-soft);
+  border-color: var(--bw-legendary);
+  background: var(--bw-legendary-soft);
 }
 .bw-row__rank {
+  color: var(--bw-legendary);
   font-weight: 800;
-  color: var(--bw-primary);
 }
 
 /* Grid */
@@ -621,27 +611,26 @@ body {
 
 /* Badge grid tile (used in BadgesTab). */
 .bw-badge-tile {
-  padding: 0.5rem;
   text-align: center;
 }
 .bw-badge-tile--locked {
-  opacity: 0.8;
+  opacity: 0.7;
   filter: grayscale(1);
 }
 .bw-badge-tile__icon {
-  width: 48px;
-  height: 48px;
+  width: 100%;
+  aspect-ratio: 1;
   object-fit: contain;
 }
 .bw-badge-tile__placeholder {
-  width: 100%;
+  width: 94%;
   aspect-ratio: 1;
-  border-radius: 50%;
+  border-radius: 14px;
   background: var(--bw-cloud);
   margin: 0 auto;
 }
 .bw-badge-tile__label {
-  margin-top: 0.25rem;
+  margin: 0.15rem auto 0.25rem;
   font-size: 0.6rem;
   color: var(--bw-ink);
 }

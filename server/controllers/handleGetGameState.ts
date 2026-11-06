@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import {
   errorHandler,
-  getBirdwatchVisitor,
-  getBirdwatchWorld,
+  getVisitor,
+  getWorld,
   getKeyAsset,
   getSpotAsset,
   getCredentials,
@@ -10,10 +10,11 @@ import {
   registerPlacedCollection,
   getVisitorBadges,
   getVisitorBirdItems,
+  getEcosystemBadges,
   invalidateInventoryCache,
 } from "@utils/index.js";
-import { emptyCollectionState } from "@utils/world/getBirdwatchWorld.js";
-import { emptyVisitorScene } from "@utils/visitor/getBirdwatchVisitor.js";
+import { emptyCollectionState } from "@utils/world/getWorld.js";
+import { emptyVisitorScene } from "@utils/visitor/getVisitor.js";
 import { KeyAssetConfigError } from "@utils/droppedAssets/getKeyAsset.js";
 import { SpotAssetConfigError } from "@utils/droppedAssets/getSpotAsset.js";
 import type { GameStateResponse } from "@shared/types/index.js";
@@ -55,7 +56,7 @@ export const handleGetGameState = async (req: Request, res: Response) => {
       throw configErr;
     }
 
-    const world = await getBirdwatchWorld(credentials);
+    const world = await getWorld(credentials);
 
     if (!collectionId) {
       // Resolve the collectionId by looking for a Collection whose stored sceneDropId
@@ -79,9 +80,11 @@ export const handleGetGameState = async (req: Request, res: Response) => {
     const adminSettings = world.dataObject.adminSettings!;
     const leaderboard = world.dataObject.leaderboard || {};
 
-    const { visitor, isAdmin, perScene } = await getBirdwatchVisitor(credentials, true, {
+    const { visitor, isAdmin, perScene } = await getVisitor(credentials, true, {
       includeInventory: true,
     });
+
+    const badgeCatalog = await getEcosystemBadges(credentials).catch(() => ({}));
 
     const payload: GameStateResponse = {
       isAdmin,
@@ -102,6 +105,7 @@ export const handleGetGameState = async (req: Request, res: Response) => {
       data: payload,
       visitorInventory: getVisitorBadges(visitor),
       visitorBirdItems: getVisitorBirdItems(visitor),
+      badgeCatalog,
       profileId,
       displayName,
     });

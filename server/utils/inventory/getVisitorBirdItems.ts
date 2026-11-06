@@ -1,4 +1,4 @@
-import type { IBirdwatchVisitor } from "../../types/DroppedAssetTypes.js";
+import type { IVisitor } from "../../types/DroppedAssetTypes.js";
 import { COLLECTIONS } from "../../data/collections/index.js";
 
 export interface VisitorBirdItem {
@@ -25,7 +25,7 @@ const nameToBirdId: Record<string, string> = (() => {
 })();
 
 /** Map the visitor's active species inventory items (non-BADGE), keyed by Bird.id. */
-export const getVisitorBirdItems = (visitor: IBirdwatchVisitor): Record<string, VisitorBirdItem> => {
+export const getVisitorBirdItems = (visitor: IVisitor): Record<string, VisitorBirdItem> => {
   const result: Record<string, VisitorBirdItem> = {};
   for (const vi of visitor.inventoryItems || []) {
     const { id, item } = vi;

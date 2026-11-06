@@ -18,7 +18,12 @@ export const PageContainer = ({
   const { error, isAdmin } = useContext(GlobalStateContext);
   const [showSettings, setShowSettings] = useState(false);
 
-  if (isLoading) return <Spinner />;
+  if (isLoading)
+    return (
+      <div className="p-4">
+        <Spinner />
+      </div>
+    );
 
   return (
     <div className="p-2 mb-28 min-h-[100vh]">
