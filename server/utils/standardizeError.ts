@@ -15,10 +15,10 @@ export const standardizeError = (error: unknown): Error => {
 
   // If error is an object, try to extract useful information
   if (typeof error === "object" && error !== null) {
-    const message = (error as any).message || JSON.stringify(error);
-    const newError = new Error(message);
-    // Add original error as property for debugging
-    (newError as any).originalError = error;
+    const asRecord = error as Record<string, unknown>;
+    const message = typeof asRecord.message === "string" ? asRecord.message : JSON.stringify(error);
+    const newError = new Error(message) as Error & { originalError?: unknown };
+    newError.originalError = error;
     return newError;
   }
 

@@ -70,9 +70,9 @@ process.on("unhandledRejection", (reason, promise) => {
   console.error("Unhandled Rejection:", reason);
 });
 
-process.on("uncaughtException", (error) => {
+process.on("uncaughtException", (error: Error & { code?: string }) => {
   // ERR_HTTP_HEADERS_SENT is non-fatal — response was already sent, just log it
-  if ((error as any).code === "ERR_HTTP_HEADERS_SENT") {
+  if (error.code === "ERR_HTTP_HEADERS_SENT") {
     console.error("Caught ERR_HTTP_HEADERS_SENT (response already sent):", error.message);
     return;
   }

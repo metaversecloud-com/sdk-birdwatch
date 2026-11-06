@@ -1,29 +1,716 @@
-/*
- * App-specific component classes.
- *
- * These are unlayered (not wrapped in `@layer { … }`) so they win over both
- * the SDK component styles (.btn, .card, etc.) and Tailwind utilities — no
- * `!important` needed.
- *
- * Use an app-specific prefix on every class name (e.g. `.er-card--running`
- * for the escape-room app, `.kr-tile` for kitchen-rush) so these classes are
- * obviously project-scoped and won't collide with the SDK or Tailwind.
- *
- * Build on top of the SDK's design system rather than replacing it:
- *
- *   <div className="card app-card app-card--featured">…</div>
- *
- * not
- *
- *   <div className="app-custom-card">…</div>
- *
- * Consume tokens from `tokens.css` instead of hard-coding values:
- *
- *   .app-card--featured {
- *     background: var(--app-grad-hero);
- *     border-color: var(--app-primary);
- *     box-shadow: var(--app-shadow-card);
- *   }
- *
- * See `.ai/style-guide.md` for the full convention.
- */
+/* Birdwatch app-specific component styles. Prefix: bw- */
+
+body {
+  background: radial-gradient(1200px 800px at 80% -5%, var(--bw-bg-1), transparent 30%),
+    radial-gradient(1200px 1420px at -30% 90%, var(--bw-bg-2), transparent 50%), var(--bw-bg-3);
+  color: var(--bw-ink);
+}
+
+.bw-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--bw-ink);
+}
+
+.bw-subtitle {
+  color: var(--bw-ink-soft);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.bw-caption {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  font-size: 0.72rem;
+  color: var(--bw-ink-mute);
+}
+
+/* Cards */
+.bw-card {
+  background: var(--bw-card);
+  color: var(--bw-card-ink);
+  border-radius: var(--bw-radius);
+  box-shadow: var(--bw-shadow-card);
+  padding: 1rem;
+}
+
+.bw-card-flat {
+  background: var(--bw-card);
+  border-radius: var(--bw-radius);
+  border: 1px solid var(--bw-cloud);
+  padding: 1rem;
+}
+
+/* Highlighted result cards (correct result spotlight on the bird). */
+.bw-card--new-species {
+  background: var(--bw-warn-soft);
+  border: 1px solid color-mix(in srgb, var(--bw-warn) 25%, transparent);
+}
+.bw-card--repeat {
+  background: var(--bw-sky);
+}
+
+/* Info banner (badge earned, +1 to Bird Count, repeat sighting counter). */
+.bw-info-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--bw-radius-sm);
+  background: var(--bw-sky);
+  color: var(--bw-ink);
+}
+.bw-info-banner--success {
+  background: var(--bw-success-soft);
+  color: var(--bw-success);
+}
+.bw-info-banner--info {
+  background: var(--bw-rare-soft);
+  color: var(--bw-rare);
+}
+.bw-info-banner__title {
+  margin: 0;
+  font-weight: 800;
+  line-height: 1.2;
+}
+.bw-info-banner__sub {
+  margin: 0;
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+/* Bird facts tiles: Spot / Eats / Nests / Behavior. */
+.bw-fact-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.4rem;
+  width: 100%;
+}
+.bw-fact {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  text-align: center;
+}
+.bw-fact__icon {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 2.1rem;
+}
+.bw-fact__icon--spot {
+  background: var(--bw-rare);
+}
+.bw-fact__icon--eats {
+  background: var(--bw-uncommon);
+}
+.bw-fact__icon--nests {
+  background: var(--bw-warn);
+}
+.bw-fact__icon--behavior {
+  background: var(--bw-primary);
+}
+.bw-fact__label {
+  margin: 0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--bw-ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.bw-fact__value {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--bw-ink);
+  line-height: 1.1;
+}
+
+/* Wrong-pick quote panel */
+.bw-wrong-panel {
+  background: var(--bw-sky);
+  border-radius: var(--bw-radius);
+  padding: 1rem;
+}
+.bw-wrong-panel__row {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  background: #fff;
+  border-radius: var(--bw-radius-sm);
+  padding: 0.6rem;
+}
+.bw-wrong-panel__quote {
+  margin: 0.75rem 0 0.25rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-align: center;
+}
+.bw-wrong-panel__sub {
+  margin: 0;
+  text-align: center;
+  color: var(--bw-ink-soft);
+}
+
+.bw-card-success {
+  background: var(--bw-success-soft);
+  border: 1px solid var(--bw-success);
+  color: var(--bw-success);
+}
+
+/* Buttons */
+.bw-btn-primary {
+  background: var(--bw-primary);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 0.7rem 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  box-shadow: var(--bw-shadow-card);
+}
+.bw-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.bw-btn-outline {
+  background: transparent;
+  color: var(--bw-primary);
+  border: 2px solid var(--bw-primary);
+  border-radius: 999px;
+  padding: 0.6rem 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  text-decoration: none;
+}
+
+.bw-btn-ghost {
+  background: transparent;
+  color: var(--bw-ink);
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bw-btn-danger {
+  background: var(--bw-danger);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 0.6rem 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Rarity chip */
+.bw-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+.bw-chip--common {
+  background: var(--bw-common-soft);
+  color: var(--bw-common);
+  border-color: var(--bw-common);
+}
+.bw-chip--uncommon {
+  background: var(--bw-uncommon-soft);
+  color: var(--bw-uncommon);
+  border-color: var(--bw-uncommon);
+}
+.bw-chip--rare {
+  background: var(--bw-rare-soft);
+  color: var(--bw-rare);
+  border-color: var(--bw-rare);
+}
+.bw-chip--legendary {
+  background: var(--bw-legendary-soft);
+  color: var(--bw-legendary);
+  border-color: var(--bw-legendary);
+}
+.bw-chip--new {
+  background: var(--bw-warn);
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 0.25rem 0.7rem;
+  letter-spacing: 0.04em;
+  border-color: var(--bw-warn);
+}
+
+/* Bird token: circular, rarity-rim, star band */
+.bw-token {
+  position: relative;
+  width: 80px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bw-sky);
+  border: 4px solid var(--bw-common);
+  overflow: visible;
+}
+.bw-token--sm {
+  width: 60px;
+}
+.bw-token--lg {
+  width: 120px;
+}
+.bw-token--common {
+  border-color: var(--bw-common);
+}
+.bw-token--uncommon {
+  border-color: var(--bw-uncommon);
+}
+.bw-token--rare {
+  border-color: var(--bw-rare);
+}
+.bw-token--legendary {
+  border-color: var(--bw-legendary);
+}
+.bw-token__img {
+  width: 100%;
+  height: 100%;
+}
+.bw-token--lg .bw-token__img {
+  animation: vibrate 1s ease 0s 1 normal forwards;
+}
+.bw-token__stars {
+  position: absolute;
+  bottom: -8px;
+  background: #fff;
+  border-radius: 999px;
+  padding: 1px 6px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: inherit;
+  box-shadow: var(--bw-shadow-card);
+}
+.bw-token--common .bw-token__stars {
+  color: var(--bw-common);
+}
+.bw-token--uncommon .bw-token__stars {
+  color: var(--bw-uncommon);
+}
+.bw-token--rare .bw-token__stars {
+  color: var(--bw-rare);
+}
+.bw-token--legendary .bw-token__stars {
+  color: var(--bw-legendary);
+}
+
+@keyframes vibrate {
+  0% {
+    transform: translate(0);
+  }
+
+  20% {
+    transform: translate(-2px, 2px);
+  }
+
+  40% {
+    transform: translate(-2px, -2px);
+  }
+
+  60% {
+    transform: translate(2px, 2px);
+  }
+
+  80% {
+    transform: translate(2px, -2px);
+  }
+
+  100% {
+    transform: translate(0);
+  }
+}
+
+/* Choice list for Identify screen */
+.bw-choice {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.6rem 0.8rem;
+  border: 2px solid var(--bw-cloud);
+  border-radius: var(--bw-radius-sm);
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+.bw-choice:hover:not(:disabled) {
+  background: var(--bw-snow);
+}
+.bw-choice:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.bw-choice--selected {
+  border-color: var(--bw-primary);
+  background: var(--bw-primary-soft);
+}
+.bw-choice--selected:hover {
+  background: var(--bw-primary-soft);
+}
+/* Selected choice stays at full opacity even while the whole card is disabled,
+   so the clicked option reads as "this is my answer, we're checking it." */
+.bw-choice--selected:disabled {
+  opacity: 1;
+  cursor: progress;
+}
+.bw-choice__letter {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  background: var(--bw-sky);
+  color: var(--bw-ink);
+}
+.bw-choice__name {
+  font-weight: 700;
+  margin: 0;
+  color: var(--bw-ink);
+  font-size: 0.95rem;
+}
+.bw-choice__desc {
+  color: var(--bw-ink-soft);
+  margin: 0;
+  font-size: 0.85rem;
+}
+.bw-choice__thumb {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+}
+
+/* Result banners */
+.bw-banner {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.7rem 1rem;
+  border-radius: var(--bw-radius-sm);
+  font-weight: 700;
+}
+.bw-banner--correct {
+  background: var(--bw-success-soft);
+  color: var(--bw-success);
+  border: 1px solid var(--bw-success);
+}
+.bw-banner--wrong {
+  background: var(--bw-warn-soft);
+  color: var(--bw-warn);
+  border: 1px solid var(--bw-warn);
+}
+
+/* Tabs */
+.bw-tabs {
+  display: flex;
+  gap: 0;
+  border-radius: 999px;
+  background: var(--bw-ink-soft);
+  padding: 4px;
+}
+.bw-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 999px;
+  font-weight: 700;
+  color: var(--bw-snow);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.bw-tab--active {
+  background: #fff;
+  color: var(--bw-ink);
+  box-shadow: var(--bw-shadow-card);
+}
+
+/* Count display (WBC tab) */
+.bw-count {
+  text-align: center;
+}
+.bw-count__total {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--bw-ink);
+  margin: 0;
+}
+.bw-count__label {
+  color: var(--bw-ink-soft);
+  margin: 0;
+  font-size: 0.9rem;
+}
+.bw-count__you {
+  color: var(--bw-primary);
+  font-weight: 800;
+  font-size: 0.9rem;
+}
+
+/* Milestone row */
+.bw-milestone {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem;
+  border-radius: var(--bw-radius-sm);
+  background: var(--bw-snow);
+  border: 1px solid var(--bw-cloud);
+}
+.bw-milestone--reached {
+  background: var(--bw-success-soft);
+  border: 1px solid var(--bw-success);
+}
+
+/* Leaderboard row */
+.bw-row {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--bw-radius-sm);
+  background: #fff;
+  border: 1px solid var(--bw-cloud);
+}
+.bw-row--me {
+  border-color: var(--bw-legendary);
+  background: var(--bw-legendary-soft);
+}
+.bw-row__rank {
+  color: var(--bw-legendary);
+  font-weight: 800;
+}
+
+/* Grid */
+.bw-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.bw-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+/* Loading indicator */
+.bw-spin {
+  animation: bw-spin 0.9s linear infinite;
+}
+@keyframes bw-spin {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Modal */
+.bw-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 42, 68, 0.55);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1rem;
+  overflow-y: auto;
+  z-index: 50;
+  animation: bw-fade-in 0.14s ease-out;
+}
+.bw-modal {
+  position: relative;
+  background: var(--bw-card);
+  border-radius: var(--bw-radius-lg);
+  box-shadow: var(--bw-shadow-pop);
+  padding: 1.25rem 1rem 1rem;
+  max-width: 420px;
+  width: 100%;
+  animation: bw-fade-in 0.14s ease-out;
+}
+.bw-modal__close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--bw-ink-soft);
+}
+.bw-modal__close:hover {
+  background: var(--bw-sky);
+  color: var(--bw-ink);
+}
+
+@keyframes bw-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Transparent "tile" button for Field Guide cells. */
+.bw-token-tile {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Pill-shaped radio for admin cooldown options. */
+.bw-pill-radio {
+  border: 2px solid var(--bw-cloud);
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  cursor: pointer;
+}
+.bw-pill-radio--active {
+  border-color: var(--bw-primary);
+}
+
+/* Danger variant of bw-btn-outline. */
+.bw-btn-outline--danger {
+  border-color: var(--bw-danger);
+  color: var(--bw-danger);
+}
+
+/* Badge grid tile (used in BadgesTab). */
+.bw-badge-tile {
+  text-align: center;
+}
+.bw-badge-tile--locked {
+  opacity: 0.7;
+  filter: grayscale(1);
+}
+.bw-badge-tile__icon {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+}
+.bw-badge-tile__placeholder {
+  width: 94%;
+  aspect-ratio: 1;
+  border-radius: 14px;
+  background: var(--bw-cloud);
+  margin: 0 auto;
+}
+.bw-badge-tile__label {
+  margin: 0.15rem auto 0.25rem;
+  font-size: 0.6rem;
+  color: var(--bw-ink);
+}
+
+/* Italic call-text in the sighting card. */
+.bw-sighting-call {
+  background: var(--bw-primary-soft);
+  color: var(--bw-primary);
+  font-style: italic;
+  font-size: 0.85rem;
+  border-radius: var(--bw-radius);
+  padding: 0.8rem;
+}
+
+/* Cooldown row status cells. */
+.bw-status--ready {
+  color: var(--bw-success);
+}
+.bw-status--resting {
+  color: var(--bw-warn);
+  font-size: 0.75rem;
+}
+
+/* Big count rendered as the cooldown timer. */
+.bw-count__total--primary {
+  color: var(--bw-primary);
+}
+
+/* Milestones progress bar with per-milestone circular markers. */
+.bw-progress {
+  position: relative;
+  height: 8px;
+  background: var(--bw-cloud);
+  border-radius: 999px;
+  margin: 1.25rem 0.75rem 1.75rem;
+}
+.bw-progress__fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: var(--bw-rare);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+.bw-progress__marker {
+  position: absolute;
+  top: 50%;
+  width: 26px;
+  height: 26px;
+  margin-left: -13px;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--bw-cloud);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bw-ink-mute);
+}
+.bw-progress__marker--reached {
+  background: var(--bw-success);
+  border-color: var(--bw-success);
+  color: #fff;
+}
+
+/* Reduce motion for the progress fill */
+@media (prefers-reduced-motion: reduce) {
+  .bw-progress__fill {
+    transition: none;
+  }
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .bw-spin {
+    animation: none;
+  }
+  .bw-modal-backdrop,
+  .bw-modal {
+    animation: none;
+  }
+}
