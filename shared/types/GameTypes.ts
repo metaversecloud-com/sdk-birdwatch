@@ -1,4 +1,5 @@
 import type { SpotKey } from "./BirdTypes.js";
+import type { MysteryBirdView } from "./MysteryBirdTypes.js";
 
 export type IdentificationMode = "description" | "picture_match";
 
@@ -87,8 +88,8 @@ export interface VisitorLegendaryAlertUsage {
 export interface VisitorMysteryBirdState {
   todayKey: string;
   puzzleId: string;
-  guessesUsed: number;
-  solved: boolean;
+  /** Birds guessed today, in order. Guesses used and solved are derived from this. */
+  guessedIds: string[];
   solvedTotal: number;
   firstTryTotal: number;
   seenPuzzleIds: string[];
@@ -115,4 +116,6 @@ export interface GameStateResponse {
   adminSettings: AdminSettings;
   worldState: CollectionWorldStateView;
   leaderboard: Record<string, LeaderboardEntryString>;
+  /** Today's Mystery Bird for this Collection, when it has puzzles. */
+  mysteryBird?: MysteryBirdView;
 }

@@ -36,23 +36,26 @@ export const pickTodayPuzzle = (
   return { puzzle, seenAfter };
 };
 
-/** Deterministic Fisher-Yates shuffle seeded on puzzleId+profileId for stable candidate order. */
-export const stableShuffleCandidateIds = (
-  puzzleId: string,
-  profileId: string,
-  candidates: string[],
-): string[] => {
-  // Mulberry32 PRNG seeded from a cheap hash.
+/** Mulberry32 PRNG seeded from a cheap string hash: same seed → same sequence. */
+export const seededRng = (seed: string): (() => number) => {
   let h = 0;
-  const seed = `${puzzleId}:${profileId}`;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
-  const rng = () => {
+  return () => {
     h |= 0;
     h = (h + 0x6d2b79f5) | 0;
     let t = Math.imul(h ^ (h >>> 15), 1 | h);
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
+};
+
+/** Deterministic Fisher-Yates shuffle seeded on puzzleId+profileId for stable candidate order. */
+export const stableShuffleCandidateIds = (
+  puzzleId: string,
+  profileId: string,
+  candidates: string[],
+): string[] => {
+  const rng = seededRng(`${puzzleId}:${profileId}`);
   const arr = candidates.slice();
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(rng() * (i + 1));

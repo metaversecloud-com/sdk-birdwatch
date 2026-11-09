@@ -11,12 +11,18 @@ import {
   getVisitorBadges,
   getVisitorBirdItems,
   getEcosystemBadges,
+  fireBadgeToast,
+  etDayKey,
+  resolveTodayMystery,
+  sumMysteryTotals,
+  toMysteryView,
   invalidateInventoryCache,
 } from "@utils/index.js";
 import { emptyCollectionState, toCollectionView } from "@utils/world/getWorld.js";
 import { KeyAssetConfigError } from "@utils/droppedAssets/getKeyAsset.js";
 import { SpotAssetConfigError } from "@utils/droppedAssets/getSpotAsset.js";
-import type { GameStateResponse } from "@shared/types/index.js";
+import type { GameStateResponse, VisitorPerScene } from "@shared/types/index.js";
+import { sceneKey } from "@shared/types/index.js";
 import { getCollectionData } from "../data/collections/index.js";
 
 /**
@@ -89,17 +95,28 @@ export const handleGetGameState = async (req: Request, res: Response) => {
     // queue. Fire-and-forget: a failed toast must not block the queue clear or the response.
     const pendingBadgeToasts = visitor.dataObject?.pendingBadgeToasts || [];
     if (pendingBadgeToasts.length) {
-      for (const badgeName of pendingBadgeToasts) {
-        visitor
-          .fireToast({
-            groupId: `badge-${badgeName}`,
-            title: "Badge Awarded",
-            text: `You have earned the ${badgeName} badge!`,
-          })
-          .catch(() => console.error(`Failed to fire toast for the ${badgeName} badge.`));
-      }
+      for (const badgeName of pendingBadgeToasts) fireBadgeToast(visitor, badgeName);
       await visitor.updateDataObject({ pendingBadgeToasts: [] }, {}).catch(() => undefined);
     }
+
+    // Today's Mystery Bird (read-only: the day's puzzle is picked deterministically, saved on first guess).
+    const collectionData = getCollectionData(collectionId);
+    const key = sceneKey(credentials.urlSlug, sceneDropId);
+    const today = collectionData?.puzzles?.length
+      ? resolveTodayMystery({
+          puzzles: collectionData.puzzles,
+          stored: (visitor.dataObject?.[key] as VisitorPerScene | undefined)?.mysteryBird?.[collectionId],
+          todayKey: etDayKey(),
+          seed: `${profileId}:${key}:${collectionId}`,
+        })
+      : undefined;
+    const mysteryBird = today
+      ? toMysteryView({
+          ...today,
+          profileId,
+          solvedTotal: sumMysteryTotals(visitor.dataObject).solvedTotal,
+        })
+      : undefined;
 
     const payload: GameStateResponse = {
       isAdmin,
@@ -108,6 +125,7 @@ export const handleGetGameState = async (req: Request, res: Response) => {
       adminSettings,
       worldState,
       leaderboard,
+      mysteryBird,
     };
 
     return res.json({

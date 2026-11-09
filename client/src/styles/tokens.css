@@ -28,6 +28,12 @@
   --bw-danger: #ee4d38;
   --bw-danger-soft: #fdecea;
 
+  /* Mystery Bird */
+  --bw-mystery: #5b3fa0;
+  --bw-mystery-soft: #f1ecfb;
+  --bw-mystery-line: #cbbcec;
+  --bw-looks: #3b4a63;
+
   /* Rarity rims and chip backgrounds */
   --bw-common: #607d8b; /* steel */
   --bw-uncommon: #22a06b; /* green */

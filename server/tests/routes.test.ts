@@ -193,8 +193,7 @@ describe("Birdwatch routes", () => {
           [collection.id]: {
             todayKey: require("../utils/mysteryBird/pickTodayPuzzle").etDayKey(),
             puzzleId: puzzle.id,
-            guessesUsed: 0,
-            solved: false,
+            guessedIds: [],
             solvedTotal: 0,
             firstTryTotal: 0,
             seenPuzzleIds: [puzzle.id],
@@ -209,6 +208,82 @@ describe("Birdwatch routes", () => {
       .send({ collectionId: collection.id, pickedBirdId: puzzle.answerId });
     expect(res.status).toBe(200);
     expect(res.body.data.outcome).toBe("solved");
-    expect(res.body.data.answerBirdId).toBe(puzzle.answerId);
+    expect(res.body.data.mysteryBird.status).toBe("solved");
+    expect(res.body.data.mysteryBird.answerId).toBe(puzzle.answerId);
+    expect(res.body.data.mysteryBird.solvedTotal).toBe(1);
+  });
+
+  test("POST /mystery/guess solve toasts the earned badge right away (not queued)", async () => {
+    const { collection } = require("../data/collections/northAmericanWinterBirds");
+    const puzzle = require("../data/collections/mysteryBirdPuzzles/northAmericanWinterBirds").puzzles[0];
+    topiaMock.ecosystemItems = [{ id: "badge-ms", name: "Mystery Solved", type: "BADGE" }];
+    topiaMock.visitorSeed = {
+      "world-scene-1": {
+        spotCooldowns: {},
+        mysteryBird: {
+          [collection.id]: {
+            todayKey: require("../utils/mysteryBird/pickTodayPuzzle").etDayKey(),
+            puzzleId: puzzle.id,
+            guessedIds: [],
+            solvedTotal: 0,
+            firstTryTotal: 0,
+            seenPuzzleIds: [puzzle.id],
+          },
+        },
+      },
+    };
+    await request(makeApp())
+      .post("/api/mystery/guess")
+      .query(CREDS)
+      .send({ collectionId: collection.id, pickedBirdId: puzzle.answerId });
+    await new Promise((r) => setTimeout(r, 10));
+    expect(topiaMock.fireToast).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "Badge Awarded", text: "You have earned the Mystery Solved badge!" }),
+    );
+  });
+
+  test("GET /game-state includes today's Mystery Bird without the answer", async () => {
+    const res = await request(makeApp()).get("/api/game-state").query(CREDS);
+    const mb = res.body.data.mysteryBird;
+    expect(mb.status).toBe("playing");
+    expect(mb.guessesLeft).toBe(2);
+    expect(mb.candidateIds).toHaveLength(4);
+    expect(mb.clues).toHaveLength(3);
+    expect(mb.answerId).toBeUndefined();
+  });
+
+  test("POST /mystery/guess wrong guess keeps the answer hidden and can't be repeated", async () => {
+    const { collection } = require("../data/collections/northAmericanWinterBirds");
+    const puzzles = require("../data/collections/mysteryBirdPuzzles/northAmericanWinterBirds").puzzles;
+    const puzzle = puzzles[0];
+    topiaMock.visitorSeed = {
+      "world-scene-1": {
+        spotCooldowns: {},
+        mysteryBird: {
+          [collection.id]: {
+            todayKey: require("../utils/mysteryBird/pickTodayPuzzle").etDayKey(),
+            puzzleId: puzzle.id,
+            guessedIds: [puzzle.decoyIds[0]],
+            solvedTotal: 0,
+            firstTryTotal: 0,
+            seenPuzzleIds: [puzzle.id],
+          },
+        },
+      },
+    };
+    const repeat = await request(makeApp())
+      .post("/api/mystery/guess")
+      .query(CREDS)
+      .send({ collectionId: collection.id, pickedBirdId: puzzle.decoyIds[0] });
+    expect(repeat.status).toBe(400);
+
+    const res = await request(makeApp())
+      .post("/api/mystery/guess")
+      .query(CREDS)
+      .send({ collectionId: collection.id, pickedBirdId: puzzle.decoyIds[1] });
+    expect(res.status).toBe(200);
+    expect(res.body.data.outcome).toBe("out");
+    expect(res.body.data.mysteryBird.guessedIds).toEqual([puzzle.decoyIds[0], puzzle.decoyIds[1]]);
+    expect(res.body.data.mysteryBird.answerId).toBe(puzzle.answerId);
   });
 });

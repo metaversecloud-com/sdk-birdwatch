@@ -9,6 +9,7 @@ export * from "./sceneAssets.js";
 export * from "./world/getWorld.js";
 export * from "./visitor/getVisitor.js";
 export * from "./mysteryBird/pickTodayPuzzle.js";
+export * from "./mysteryBird/todayMystery.js";
 export * from "./cleanReturnPayload.js";
 export * from "./errorHandler.js";
 export * from "./getCredentials.js";

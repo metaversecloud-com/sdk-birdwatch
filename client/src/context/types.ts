@@ -1,8 +1,9 @@
-import type { Bird, GameStateResponse } from "@shared/types/index.js";
+import type { Bird, GameStateResponse, MysteryBirdView } from "@shared/types/index.js";
 
 export const SET_HAS_INTERACTIVE_PARAMS = "SET_HAS_INTERACTIVE_PARAMS";
 export const SET_GAME_STATE = "SET_GAME_STATE";
 export const SET_ERROR = "SET_ERROR";
+export const SET_MYSTERY_BIRD = "SET_MYSTERY_BIRD";
 export const SET_PROFILE = "SET_PROFILE";
 
 export type InteractiveParams = {
@@ -37,7 +38,7 @@ export interface InitialState {
 
 export type ActionType = {
   type: string;
-  payload: Partial<InitialState>;
+  payload: Partial<InitialState> & { mysteryBird?: MysteryBirdView };
 };
 
 export type ErrorType =

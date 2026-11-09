@@ -110,16 +110,21 @@ body {
   color: #fff;
   font-size: 2.1rem;
 }
-.bw-fact__icon--spot {
+/* Fact / clue tile colors: single source for bird-card facts and Mystery Bird clues.
+   Kinds match FACT_ICONS in data/factIcons.ts. */
+.bw-fact-color--looks {
+  background: var(--bw-looks);
+}
+.bw-fact-color--spot {
   background: var(--bw-rare);
 }
-.bw-fact__icon--eats {
+.bw-fact-color--eats {
   background: var(--bw-uncommon);
 }
-.bw-fact__icon--nests {
+.bw-fact-color--nests {
   background: var(--bw-warn);
 }
-.bw-fact__icon--behavior {
+.bw-fact-color--behavior {
   background: var(--bw-primary);
 }
 .bw-fact__label {
@@ -443,7 +448,7 @@ body {
   font-weight: 700;
   color: var(--bw-snow);
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 .bw-tab--active {
   background: #fff;
@@ -702,6 +707,203 @@ body {
   background: var(--bw-success);
   border-color: var(--bw-success);
   color: #fff;
+}
+
+/* ---------- Mystery Bird ---------- */
+.bw-mystery-text {
+  color: var(--bw-mystery);
+}
+.bw-btn-mystery {
+  background: var(--bw-mystery);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 0.7rem 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  box-shadow: var(--bw-shadow-card);
+}
+.bw-btn-mystery:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.bw-mystery-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--bw-radius);
+  background: var(--bw-mystery-soft);
+  border: 1px solid var(--bw-mystery-line);
+  color: var(--bw-mystery);
+}
+.bw-guess-dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: var(--bw-mystery);
+}
+.bw-guess-dot--used {
+  background: var(--bw-mystery-line);
+}
+
+.bw-clue {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.5rem 0.3rem;
+  border-radius: var(--bw-radius-sm);
+  border: 1px solid var(--bw-mystery-line);
+  background: var(--bw-card);
+  color: var(--bw-ink);
+  cursor: pointer;
+  text-align: center;
+}
+.bw-clue--open {
+  background: var(--bw-mystery-soft);
+  border: 2px solid var(--bw-mystery);
+}
+.bw-clue__info {
+  position: absolute;
+  top: 0.3rem;
+  left: 0.3rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  background: var(--bw-mystery);
+  color: #fff;
+  font-size: 0.7rem;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1.1rem;
+}
+.bw-clue__icon {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.1rem;
+}
+.bw-clue__short {
+  font-size: 0.8rem;
+  line-height: 1.1;
+}
+.bw-clue-text {
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--bw-radius-sm);
+  background: var(--bw-mystery);
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.bw-candidate {
+  background: var(--bw-card);
+  border: 1px solid var(--bw-cloud);
+  border-radius: var(--bw-radius);
+  padding: 0.7rem;
+}
+.bw-candidate--open {
+  border: 2px solid var(--bw-mystery);
+}
+.bw-candidate--answer {
+  border: 2px solid var(--bw-success);
+}
+.bw-candidate--wrong {
+  background: var(--bw-snow);
+  opacity: 0.65;
+}
+.bw-candidate__head {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+}
+.bw-candidate__name {
+  font-size: 1rem;
+}
+.bw-candidate__caret {
+  color: var(--bw-ink-mute);
+}
+.bw-candidate__wrong {
+  margin: 0.25rem 0 0;
+  color: var(--bw-danger);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.bw-candidate__answer {
+  margin: 0.25rem 0 0;
+  color: var(--bw-success);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.bw-call {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--bw-radius-sm);
+  background: var(--bw-snow);
+  text-align: left;
+}
+.bw-call__icon {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bw-mystery);
+  color: #fff;
+}
+
+.bw-mystery-result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 1rem;
+  border-radius: var(--bw-radius);
+  text-align: center;
+}
+.bw-mystery-result--solved {
+  background: var(--bw-success-soft);
+  border: 1px solid var(--bw-success);
+}
+.bw-mystery-result--solved h3 {
+  color: var(--bw-success);
+}
+.bw-mystery-result--out {
+  background: var(--bw-warn-soft);
+  border: 1px solid var(--bw-warn);
+}
+.bw-mystery-result--out h3 {
+  color: var(--bw-primary-ink);
+}
+.bw-stamp {
+  display: inline-block;
+  padding: 0.15rem 0.8rem;
+  border: 2px solid var(--bw-success);
+  border-radius: 6px;
+  color: var(--bw-success);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transform: rotate(-3deg);
 }
 
 /* Reduce motion for the progress fill */

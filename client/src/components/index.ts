@@ -14,3 +14,4 @@ export { BirdPage } from "./BirdPage";
 export { LeaderboardTab } from "./LeaderboardTab";
 export { BadgesTab } from "./BadgesTab";
 export { AdminSettingsPanel } from "./AdminSettingsPanel";
+export { MysteryBirdTab } from "./mysteryBird/MysteryBirdTab";

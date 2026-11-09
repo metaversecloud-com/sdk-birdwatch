@@ -184,7 +184,7 @@ export const handleResolveSighting = async (req: Request, res: Response) => {
 
     const totalSpeciesEver = fieldGuideBirdIds.size;
     // Collected here, granted in one fire-and-forget call below (same reasoning as
-    // `grantSpeciesItem`). The next /game-state picks up the badges and fires their toasts.
+    // `grantSpeciesItem`). Each badge toasts as soon as its grant succeeds.
     const badgesToAward: string[] = [];
     const tryAward = (name: string) => {
       if (inventoryBadgeNames.has(name)) return;
@@ -217,7 +217,8 @@ export const handleResolveSighting = async (req: Request, res: Response) => {
       tryAward(MILESTONE_BADGES.expertBirder);
     }
 
-    awardBadges(credentials, profileId, badgesToAward).catch((error) =>
+    // Earned by this player's own pick: toast right away.
+    awardBadges(credentials, profileId, badgesToAward, { toastVisitor: visitor }).catch((error) =>
       console.error("handleResolveSighting: awardBadges failed", error),
     );
 
@@ -255,7 +256,10 @@ export const handleResolveSighting = async (req: Request, res: Response) => {
       const participants = participantsFor({ ...collectionState, perPlayerContribution: nextPerPlayer });
       const championBadge = championBirderBadge(data.collection);
       for (const pid of participants) {
-        awardBadges(credentials, pid, [championBadge]).catch(() => undefined);
+        // The player whose pick crossed M3 is toasted now; everyone else on their next open.
+        awardBadges(credentials, pid, [championBadge], pid === profileId ? { toastVisitor: visitor } : {}).catch(
+          (error) => console.error("handleResolveSighting: Champion Birder award failed", error),
+        );
       }
       World.create(urlSlug, { credentials })
         .fireToast({

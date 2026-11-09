@@ -43,7 +43,7 @@ Three unique names — the **same across every Collection** and every spot type.
 | `POST` | `/api/admin/settings`          | `Partial<AdminSettings>`         | `{ success, data: { adminSettings } }` (admin only)                                                                                                                                   |
 | `POST` | `/api/admin/reset-bird-count`  | —                                | `{ success, data: { reset: n } }` (admin only)                                                                                                                                        |
 | `POST` | `/api/admin/reset-leaderboard` | —                                | `{ success, data: { leaderboard: {} } }` (admin only)                                                                                                                                 |
-| `POST` | `/api/mystery/guess` (stretch) | `{ collectionId, pickedBirdId }` | `{ success, data: { outcome: "solved" \| "wrong" \| "out", answerBirdId, answerSpot, guessesLeft, grantedBadges, state } }`                                                           |
+| `POST` | `/api/mystery/guess`           | `{ collectionId, pickedBirdId }` | `{ success, data: { outcome: "solved" \| "wrong" \| "out", mysteryBird: MysteryBirdView } }` (answer withheld until done) |
 
 All endpoints accept the standard Topia iframe credentials via query params; `forceRefreshInventory=true` busts the ecosystem-inventory cache for that request.
 
@@ -77,7 +77,7 @@ interface CollectionWorldState {
 ```ts
 interface VisitorDataObject {
   [sceneKey: string]: VisitorPerScene;
-  pendingBadgeToasts?: string[]; // badge names toasted (then cleared) on the next /game-state
+  pendingBadgeToasts?: string[]; // shared awards made by someone else (Champion Birder): toasted, then cleared, on the next /game-state
 }
 
 interface VisitorPerScene {
@@ -86,7 +86,7 @@ interface VisitorPerScene {
   legendaryAlertUsage?: { alertId; usedAssetIds };
   mysteryBird?: Record<
     collectionId,
-    { todayKey; puzzleId; guessesUsed; solved; solvedTotal; firstTryTotal; seenPuzzleIds }
+    { todayKey; puzzleId; guessedIds; solvedTotal; firstTryTotal; seenPuzzleIds } // saved on first guess
   >;
 }
 ```
