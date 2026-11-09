@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 // components
@@ -37,30 +37,33 @@ export const SpotDrawer = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
+  // Also re-run when the cooldown countdown reaches 0, to bring up the next bird.
+  const startSighting = useCallback(async () => {
+    try {
+      const r = await backendAPI.post("/sightings/start");
+      setSpot(r.data?.data?.spot ?? null);
+      const next = r.data?.data?.sighting;
+      // No sighting means the spot is still resting: show the cooldown screen.
+      if (next) {
+        setSighting(next);
+        setPhase("sighting");
+      } else setPhase("idle");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (e: any) {
+      if (e?.response?.status === 400) {
+        // Cooldown without an in-flight sighting
+        setPhase("idle");
+      } else setErrorMessage(dispatch, e as ErrorType);
+    } finally {
+      setLoading(false);
+    }
+  }, [dispatch]);
+
   useEffect(() => {
+    // Wait for App.tsx to finish setupBackendAPI AND its bootstrap /game-state fetch.
     if (!gameState) return;
-    const bootstrap = async () => {
-      try {
-        const r = await backendAPI.post("/sightings/start");
-        setSpot(r.data?.data?.spot ?? null);
-        const next = r.data?.data?.sighting;
-        // No sighting means the spot is still resting: show the cooldown screen.
-        if (next) {
-          setSighting(next);
-          setPhase("sighting");
-        } else setPhase("idle");
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (e: any) {
-        if (e?.response?.status === 400) {
-          // Cooldown without an in-flight sighting
-          setPhase("idle");
-        } else setErrorMessage(dispatch, e as ErrorType);
-      } finally {
-        setLoading(false);
-      }
-    };
-    bootstrap();
-  }, [dispatch, gameState]);
+    startSighting();
+  }, [gameState, startSighting]);
 
   const pick = async (pickedBirdId: string) => {
     setSubmitting(true);
@@ -86,11 +89,12 @@ export const SpotDrawer = () => {
         <ResultView
           result={result}
           onDone={() => setPhase("idle")}
+          onCooldownReady={startSighting}
           onOpenFieldGuide={openFieldGuide}
           onSeeFieldGuidePage={() => setOpenBird(result.rightBird)}
         />
       )}
-      {phase === "idle" && !loading && <CooldownScreen onOpenFieldGuide={openFieldGuide} />}
+      {phase === "idle" && !loading && <CooldownScreen onOpenFieldGuide={openFieldGuide} onReady={startSighting} />}
       {openBird && <BirdPage bird={openBird} onClose={() => setOpenBird(null)} />}
     </PageContainer>
   );

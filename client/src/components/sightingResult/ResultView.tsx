@@ -8,12 +8,13 @@ import { ResultDataType } from "@/context/types";
 interface Props {
   result: ResultDataType;
   onDone: () => void;
+  onCooldownReady?: () => void;
   onOpenFieldGuide: () => void;
   onSeeFieldGuidePage: () => void;
 }
 
 /** The three result variants shown after a sighting is resolved: new species, repeat, or wrong pick. */
-export const ResultView = ({ result, onDone, onOpenFieldGuide, onSeeFieldGuidePage }: Props) => {
+export const ResultView = ({ result, onDone, onCooldownReady, onOpenFieldGuide, onSeeFieldGuidePage }: Props) => {
   const b = result.rightBird;
 
   if (result.outcome === "wrong") {
@@ -31,7 +32,7 @@ export const ResultView = ({ result, onDone, onOpenFieldGuide, onSeeFieldGuidePa
           <p className="bw-wrong-panel__quote">It flew away!</p>
           <p className="bw-wrong-panel__sub">Don't worry, keep looking and you'll get another chance!</p>
         </div>
-        <CooldownScreen onOpenFieldGuide={onOpenFieldGuide} />
+        <CooldownScreen onOpenFieldGuide={onOpenFieldGuide} onReady={onCooldownReady} />
       </div>
     );
   }

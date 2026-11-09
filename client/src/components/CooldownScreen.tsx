@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { backendAPI } from "@/utils";
 import { Spinner } from "./Spinner";
 
@@ -18,8 +18,15 @@ const mmss = (s: number) => {
   return `${m}:${r.toString().padStart(2, "0")}`;
 };
 
-export const CooldownScreen = ({ onOpenFieldGuide }: { onOpenFieldGuide: () => void }) => {
+interface Props {
+  onOpenFieldGuide: () => void;
+  /** Called once when a running countdown reaches 0, so the spot can be played again. */
+  onReady?: () => void;
+}
+
+export const CooldownScreen = ({ onOpenFieldGuide, onReady }: Props) => {
   const [remaining, setRemaining] = useState<number>(0);
+  const wasCounting = useRef(false);
   const [spotsToTry, setSpotsToTry] = useState<SpotStatus[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -34,10 +41,18 @@ export const CooldownScreen = ({ onOpenFieldGuide }: { onOpenFieldGuide: () => v
   }, []);
 
   useEffect(() => {
-    if (remaining <= 0) return;
+    if (remaining <= 0) {
+      // Only after an actual countdown: a screen that opens at 0 shouldn't loop.
+      if (wasCounting.current) {
+        wasCounting.current = false;
+        onReady?.();
+      }
+      return;
+    }
+    wasCounting.current = true;
     const t = setInterval(() => setRemaining((s) => Math.max(0, s - 1)), 1000);
     return () => clearInterval(t);
-  }, [remaining]);
+  }, [remaining, onReady]);
 
   if (loading) return <Spinner label="Checking..." />;
 
