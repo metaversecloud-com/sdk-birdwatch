@@ -3,6 +3,14 @@ export type Rarity = "common" | "uncommon" | "rare" | "legendary";
 export const SPOT_KEYS = ["feeder", "pine_woods", "frozen_pond", "berry_bushes"] as const;
 export type SpotKey = (typeof SPOT_KEYS)[number];
 
+/** "1 minute", "5 minutes", "1 hour" — for player-facing copy. */
+export const formatDuration = (seconds: number): string => {
+  const plural = (n: number, unit: string) => `${n} ${unit}${n === 1 ? "" : "s"}`;
+  if (seconds >= 3600 && seconds % 3600 === 0) return plural(seconds / 3600, "hour");
+  if (seconds >= 60 && seconds % 60 === 0) return plural(seconds / 60, "minute");
+  return plural(seconds, "second");
+};
+
 export const SPOT_LABELS: Record<SpotKey, string> = {
   feeder: "Feeder",
   pine_woods: "Pine Woods",

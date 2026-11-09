@@ -131,7 +131,7 @@ export class WorldFactory {
 export class WorldActivityFactory {
   constructor(_topia: any) {}
   create(_urlSlug: string, _opts: any) {
-    return { fireToast };
+    return { fireToast, currentVisitors: jest.fn().mockResolvedValue({}) };
   }
 }
 

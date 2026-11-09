@@ -18,20 +18,20 @@ const mmss = (s: number) => {
   return `${m}:${r.toString().padStart(2, "0")}`;
 };
 
-export const CooldownScreen = ({ assetId, onOpenFieldGuide }: { assetId: string; onOpenFieldGuide: () => void }) => {
+export const CooldownScreen = ({ onOpenFieldGuide }: { onOpenFieldGuide: () => void }) => {
   const [remaining, setRemaining] = useState<number>(0);
   const [spotsToTry, setSpotsToTry] = useState<SpotStatus[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     backendAPI
-      .get(`/cooldown/${assetId}`)
+      .get("/cooldown")
       .then((r) => {
         setRemaining(r.data?.data?.remainingSeconds ?? 0);
         setSpotsToTry(r.data?.data?.spotsToTry ?? []);
       })
       .finally(() => setLoading(false));
-  }, [assetId]);
+  }, []);
 
   useEffect(() => {
     if (remaining <= 0) return;

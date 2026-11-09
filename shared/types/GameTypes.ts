@@ -45,7 +45,8 @@ export interface LegendaryAlert {
   alertId: string;
   birdId: string;
   spot: SpotKey;
-  firedAt: number;
+  /** When the Legendary leaves (ms). The window is the admin cooldown setting at the time it was found. */
+  expiresAt: number;
 }
 
 /** Stored on the world data object, per Collection. */

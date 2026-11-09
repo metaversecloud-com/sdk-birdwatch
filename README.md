@@ -37,9 +37,9 @@ Three unique names — the **same across every Collection** and every spot type.
 | Method | Path                           | Body                             | Response                                                                                                                                                                              |
 | ------ | ------------------------------ | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GET`  | `/api/game-state`              | —                                | `{ success, data: GameStateResponse, visitorInventory, visitorBirdItems, profileId, displayName }`                                                                                    |
-| `POST` | `/api/sightings/start`         | —                                | `{ success, reused, data: { sighting: VisitorInFlightSighting } }`                                                                                                                    |
+| `POST` | `/api/sightings/start`         | —                                | `{ success, reused, data: { spot, sighting: VisitorInFlightSighting \| null } }` (`null` while the spot is resting)                                                                          |
 | `POST` | `/api/sightings/resolve`       | `{ pickedBirdId }`               | `{ success, data: { outcome: "new_species" \| "repeat" \| "wrong", rightBird, pickedBird, timesSpotted?, grantedBadges, milestoneCrossed?, newTotalSightings?, yourSpeciesCount? } }` |
-| `GET`  | `/api/cooldown/:assetId`       | —                                | `{ success, data: { remainingSeconds, spotsToTry: SpotStatus[], activeLegendaryAlert? } }`                                                                                            |
+| `GET`  | `/api/cooldown`                | —                                | `{ success, data: { remainingSeconds, spotsToTry: SpotStatus[], activeLegendaryAlert? } }`                                                                                            |
 | `POST` | `/api/admin/settings`          | `Partial<AdminSettings>`         | `{ success, data: { adminSettings } }` (admin only)                                                                                                                                   |
 | `POST` | `/api/admin/reset-bird-count`  | —                                | `{ success, data: { reset: n } }` (admin only)                                                                                                                                        |
 | `POST` | `/api/admin/reset-leaderboard` | —                                | `{ success, data: { leaderboard: {} } }` (admin only)                                                                                                                                 |
@@ -66,7 +66,7 @@ interface CollectionWorldState {
   perBirdSightings: Record<birdId, count>;
   perPlayerContribution: Record<profileId, count>; // keys are the participants list for Champion Birder on M3
   rarestSighting?: { birdId; byDisplayName };
-  activeLegendaryAlert?: { alertId; birdId; spot; firedAt };
+  activeLegendaryAlert?: { alertId; birdId; spot; expiresAt }; // window = admin cooldown setting
 }
 ```
 

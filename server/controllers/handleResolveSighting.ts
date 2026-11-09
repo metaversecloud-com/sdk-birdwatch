@@ -17,13 +17,12 @@ import {
   MILESTONE_BADGES,
   TOTAL_CORRECT_ID_THRESHOLDS,
   World,
+  WorldActivity,
 } from "@utils/index.js";
 import type { Bird, LegendaryAlert } from "@shared/types/index.js";
-import { RARITY_LABEL, sceneKey } from "@shared/types/index.js";
+import { DEFAULT_ADMIN_SETTINGS, RARITY_LABEL, SPOT_LABELS, formatDuration, sceneKey } from "@shared/types/index.js";
 import type { DataObjectPatch } from "../types/DroppedAssetTypes.js";
 import { COLLECTIONS, getCollectionData } from "../data/collections/index.js";
-
-const LEGENDARY_WINDOW_MS = 5 * 60 * 1000;
 
 interface ResolveBody {
   pickedBirdId?: string;
@@ -118,18 +117,19 @@ export const handleResolveSighting = async (req: Request, res: Response) => {
       ? { birdId: rightBird.id, byDisplayName: displayName || "Anonymous" }
       : currentRarest;
 
-    // Legendary alert bookkeeping.
+    // Legendary alert bookkeeping. The Legendary stays for the admin cooldown setting.
+    const legendaryWindowSeconds = worldData.adminSettings?.cooldownSeconds ?? DEFAULT_ADMIN_SETTINGS.cooldownSeconds;
     let nextLegendaryAlert: LegendaryAlert | undefined = collectionState.activeLegendaryAlert;
-    const alertStillFresh = nextLegendaryAlert && now - nextLegendaryAlert.firedAt < LEGENDARY_WINDOW_MS;
-    let fireLegendaryWorldToast = false;
+    const alertStillFresh = typeof nextLegendaryAlert?.expiresAt === "number" && now < nextLegendaryAlert.expiresAt;
+    let fireLegendaryAlert = false;
     if (rightBird.rarity === "legendary" && !alertStillFresh) {
       nextLegendaryAlert = {
         alertId: `${inFlight.collectionId}:${now}`,
         birdId: rightBird.id,
         spot: rightBird.spot,
-        firedAt: now,
+        expiresAt: now + legendaryWindowSeconds * 1000,
       };
-      fireLegendaryWorldToast = true;
+      fireLegendaryAlert = true;
     }
 
     // Leaderboard species count = the player's Field Guide size.
@@ -158,7 +158,7 @@ export const handleResolveSighting = async (req: Request, res: Response) => {
         ...(milestoneCross
           ? [{ analyticName: "milestoneReaches", uniqueKey: `${inFlight.collectionId}:${milestoneCross}` }]
           : []),
-        ...(fireLegendaryWorldToast
+        ...(fireLegendaryAlert
           ? [{ analyticName: "legendaryAlerts", uniqueKey: `${inFlight.collectionId}:${now}` }]
           : []),
       ],
@@ -221,17 +221,32 @@ export const handleResolveSighting = async (req: Request, res: Response) => {
       console.error("handleResolveSighting: awardBadges failed", error),
     );
 
-    // Fire the world-wide Legendary toast.
-    if (fireLegendaryWorldToast) {
-      World.create(urlSlug, { credentials })
+    // Legendary Alert: the finder gets their own message; everyone else in the world gets the
+    // alert. World.fireToast can't exclude a visitor, so others are toasted one by one.
+    if (fireLegendaryAlert) {
+      const spotLabel = SPOT_LABELS[rightBird.spot];
+      const duration = formatDuration(legendaryWindowSeconds);
+      visitor
         .fireToast({
-          title: `Legendary ${rightBird.name} spotted!`,
-          text: `A Legendary ${rightBird.name} was spotted at the ${rightBird.spot
-            .split("_")
-            .map((p) => p[0].toUpperCase() + p.slice(1))
-            .join(" ")}! Hurry over to see it!`,
+          title: "Legendary find!",
+          text: `You found a Legendary ${rightBird.name}! It'll stay at the ${spotLabel} for ${duration.replace(" ", " more ")} so other players can spot it too.`,
         })
         .catch(() => undefined);
+      WorldActivity.create(urlSlug, { credentials })
+        .currentVisitors()
+        .then((visitors) =>
+          Promise.allSettled(
+            Object.values(visitors)
+              .filter((v) => String(v.id) !== String(credentials.visitorId))
+              .map((v) =>
+                v.fireToast({
+                  title: `Legendary ${rightBird.name} spotted!`,
+                  text: `A Legendary ${rightBird.name} was spotted at the ${spotLabel}! Hurry, it's only there for the next ${duration}.`,
+                }),
+              ),
+          ),
+        )
+        .catch((error) => console.error("handleResolveSighting: Legendary alert toasts failed", error));
     }
 
     // Milestone 3: Champion Birder badge to every participant. Fire-and-forget per-pid;
@@ -260,8 +275,9 @@ export const handleResolveSighting = async (req: Request, res: Response) => {
 
     const outcome: "new_species" | "repeat" = isNewSpecies ? "new_species" : "repeat";
 
-    // Rare/Legendary repeat: fire a player-personal "find" toast (not world-wide).
-    if (!isNewSpecies && (rightBird.rarity === "rare" || rightBird.rarity === "legendary")) {
+    // Rare/Legendary repeat: fire a player-personal "find" toast (not world-wide). Skipped when
+    // this pick started a Legendary Alert, since the finder already got their own message.
+    if (!isNewSpecies && !fireLegendaryAlert && (rightBird.rarity === "rare" || rightBird.rarity === "legendary")) {
       visitor
         .fireToast({
           title: `${RARITY_LABEL[rightBird.rarity]} find!`,
@@ -278,7 +294,7 @@ export const handleResolveSighting = async (req: Request, res: Response) => {
         pickedBird,
         timesSpotted,
         milestoneCrossed: milestoneCross,
-        legendaryAlertStarted: fireLegendaryWorldToast ? nextLegendaryAlert : undefined,
+        legendaryAlertStarted: fireLegendaryAlert ? nextLegendaryAlert : undefined,
         newTotalSightings: nextTotal,
         yourSpeciesCount: totalSpeciesEver,
       },

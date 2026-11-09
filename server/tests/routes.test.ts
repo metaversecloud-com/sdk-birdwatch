@@ -81,6 +81,16 @@ describe("Birdwatch routes", () => {
     expect(res.body.data.sighting.choiceBirdIds).toHaveLength(3);
   });
 
+  test("POST /sightings/start during cooldown with no in-flight sighting doesn't re-roll", async () => {
+    const spotCreds = { ...CREDS, assetId: "asset-spot-feeder", uniqueName: "Birdwatch_spot" };
+    topiaMock.visitorSeed = {
+      "world-scene-1": { spotCooldowns: { "asset-spot-feeder": Date.now() + 60_000 }, inFlight: {} },
+    };
+    const res = await request(makeApp()).post("/api/sightings/start").query(spotCreds);
+    expect(res.status).toBe(200);
+    expect(res.body.data.sighting).toBeNull();
+  });
+
   test("POST /sightings/resolve wrong pick returns outcome='wrong' and doesn't update world count", async () => {
     const spotCreds = { ...CREDS, assetId: "asset-spot-feeder", uniqueName: "Birdwatch_spot" };
     // Seed a fake in-flight so resolve has something to validate against.

@@ -547,6 +547,8 @@ body {
 }
 .bw-modal {
   position: relative;
+  top: 50%;
+  transform: translateY(-50%);
   background: var(--bw-card);
   border-radius: var(--bw-radius-lg);
   box-shadow: var(--bw-shadow-pop);

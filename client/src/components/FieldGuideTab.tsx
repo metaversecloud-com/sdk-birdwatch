@@ -48,12 +48,14 @@ export const FieldGuideTab = ({ onOpenBird }: { onOpenBird: (bird: Bird) => void
         const inSpot = birdsBySpot[spot].filter(inFilter);
         if (!inSpot.length) return null;
         const foundInSpot = birdsBySpot[spot].filter((b) => visitorBirdItems?.[b.id]).length;
+        // Under "Missing", count the missing birds so the number matches the tiles shown.
+        const shownCount = filter === "missing" ? birdsBySpot[spot].length - foundInSpot : foundInSpot;
         return (
           <div className="bw-card-flat" key={spot}>
             <div className="flex justify-between mb-2">
               <strong>{SPOT_LABELS[spot]}</strong>
               <span className="bw-caption">
-                {foundInSpot} / {birdsBySpot[spot].length}
+                {shownCount} / {birdsBySpot[spot].length}
               </span>
             </div>
             <div className="bw-grid-3 justify-items-center">
@@ -67,12 +69,16 @@ export const FieldGuideTab = ({ onOpenBird }: { onOpenBird: (bird: Bird) => void
                     onClick={() => onOpenBird(bird)}
                     aria-label={`${bird.name}${got ? " (found)" : " (not found yet)"}`}
                   >
-                    <BirdToken
-                      birdId={bird.id}
-                      rarity={bird.rarity}
-                      src={got ? discoveredBirdImage(bird.id) : undiscoveredBirdImage(bird.id)}
-                    />
-                    <p className="bw-caption text-center">{bird.name.split(" ").slice(-1)[0]}</p>
+                    <div className="tooltip">
+                      <span className="p3 tooltip-content">{bird.name}</span>
+                      <BirdToken
+                        birdId={bird.id}
+                        rarity={bird.rarity}
+                        src={got ? discoveredBirdImage(bird.id) : undiscoveredBirdImage(bird.id)}
+                      />
+                    </div>
+                    <p className="bw-caption text-center">{bird.name}</p>
+                    {/* <p className="bw-caption text-center">{bird.name.split(" ").slice(-1)[0]}</p> */}
                   </button>
                 );
               })}

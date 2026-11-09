@@ -50,32 +50,34 @@ export const handleStartSighting = async (req: Request, res: Response) => {
       return res.json({
         success: true,
         reused: true,
-        data: { sighting: existingInFlight },
+        data: { spot: spotMeta.spot, sighting: existingInFlight },
       });
     }
 
     const legendaryUsage = perScene.legendaryAlertUsage;
     const activeAlert = collectionState?.activeLegendaryAlert;
-    const alertFreshFor = (fired: number) => now - fired < 5 * 60 * 1000;
     const isLegendarySkip = Boolean(
       activeAlert &&
         activeAlert.spot === spotMeta.spot &&
-        alertFreshFor(activeAlert.firedAt) &&
+        typeof activeAlert.expiresAt === "number" &&
+        now < activeAlert.expiresAt &&
         (!legendaryUsage ||
           legendaryUsage.alertId !== activeAlert.alertId ||
           !legendaryUsage.usedAssetIds.includes(assetId)),
     );
+
+    // Spot is resting and its sighting was already resolved: don't re-roll. The client shows
+    // the cooldown screen. A fresh Legendary Alert for this spot type still gets through.
+    if (inCooldown(cd, now) && !isLegendarySkip) {
+      return res.json({ success: true, data: { spot: spotMeta.spot, sighting: null } });
+    }
 
     const data = getCollectionData(spotMeta.collectionId);
     if (!data) return res.status(400).json({ success: false, message: "Unknown collection." });
 
     const rightBird = isLegendarySkip
       ? data.birdsById[activeAlert!.birdId]
-      : rollBirdForSpot(
-          spotMeta.collectionId,
-          spotMeta.spot,
-          milestoneStateFor(collectionState?.totalSightings || 0),
-        );
+      : rollBirdForSpot(spotMeta.collectionId, spotMeta.spot, milestoneStateFor(collectionState?.totalSightings || 0));
 
     const [a, b, c] = pickChoices(spotMeta.collectionId, spotMeta.spot, rightBird);
 
@@ -85,7 +87,7 @@ export const handleStartSighting = async (req: Request, res: Response) => {
       choiceBirdIds: [a.id, b.id, c.id],
     };
 
-    const cooldownSeconds = isLegendarySkip ? 60 : (adminSettings?.cooldownSeconds ?? 60);
+    const cooldownSeconds = isLegendarySkip ? 60 : adminSettings?.cooldownSeconds ?? 60;
     const cooldownEndsAt = now + cooldownSeconds * 1000;
 
     // Update: track usage of the Legendary Alert for this player + record in-flight + cooldown.
@@ -106,7 +108,7 @@ export const handleStartSighting = async (req: Request, res: Response) => {
       analytics: [{ analyticName: "spotClicks", uniqueKey: profileId, urlSlug }],
     });
 
-    return res.json({ success: true, reused: false, data: { sighting: inFlight } });
+    return res.json({ success: true, reused: false, data: { spot: spotMeta.spot, sighting: inFlight } });
   } catch (error) {
     return errorHandler({
       error,

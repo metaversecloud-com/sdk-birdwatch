@@ -13,7 +13,8 @@ import { ErrorType, ResultDataType } from "@/context/types";
 // utils
 import { backendAPI, setErrorMessage } from "@/utils";
 
-import type { Bird, VisitorInFlightSighting } from "@shared/types";
+import { SPOT_LABELS } from "@shared/types";
+import type { Bird, SpotKey, VisitorInFlightSighting } from "@shared/types";
 
 type Phase = "idle" | "sighting" | "result";
 
@@ -22,10 +23,6 @@ export const SpotDrawer = () => {
   const { gameState } = useContext(GlobalStateContext);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const assetId = searchParams.get("assetId") || "";
-
-  // Navigate to Home with the Field Guide tab pre-selected, preserving the session
-  // credentials carried on the URL.
   const openFieldGuide = () => {
     const next = new URLSearchParams(searchParams);
     next.set("tab", "fg");
@@ -36,19 +33,22 @@ export const SpotDrawer = () => {
   const [sighting, setSighting] = useState<VisitorInFlightSighting | null>(null);
   const [result, setResult] = useState<ResultDataType | null>(null);
   const [openBird, setOpenBird] = useState<Bird | null>(null);
+  const [spot, setSpot] = useState<SpotKey | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    // Wait for App.tsx to finish setupBackendAPI AND its bootstrap /game-state fetch.
-    // Without this, the first POST goes out through bare axios (no `/api` baseURL),
-    // Vite's dev server returns 404, and no server log appears.
     if (!gameState) return;
     const bootstrap = async () => {
       try {
         const r = await backendAPI.post("/sightings/start");
-        setSighting(r.data?.data?.sighting);
-        setPhase("sighting");
+        setSpot(r.data?.data?.spot ?? null);
+        const next = r.data?.data?.sighting;
+        // No sighting means the spot is still resting: show the cooldown screen.
+        if (next) {
+          setSighting(next);
+          setPhase("sighting");
+        } else setPhase("idle");
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (e: any) {
         if (e?.response?.status === 400) {
@@ -78,7 +78,7 @@ export const SpotDrawer = () => {
   const mode = gameState?.adminSettings?.identificationMode || "description";
 
   return (
-    <PageContainer isLoading={loading} headerText="Bird spot">
+    <PageContainer isLoading={loading} headerText={spot ? SPOT_LABELS[spot] : "Bird spot"}>
       {phase === "sighting" && sighting && (
         <BirdSightingCard sighting={sighting} mode={mode} onPick={pick} disabled={submitting} />
       )}
@@ -86,12 +86,11 @@ export const SpotDrawer = () => {
         <ResultView
           result={result}
           onDone={() => setPhase("idle")}
-          assetId={assetId}
           onOpenFieldGuide={openFieldGuide}
           onSeeFieldGuidePage={() => setOpenBird(result.rightBird)}
         />
       )}
-      {phase === "idle" && !loading && <CooldownScreen assetId={assetId} onOpenFieldGuide={openFieldGuide} />}
+      {phase === "idle" && !loading && <CooldownScreen onOpenFieldGuide={openFieldGuide} />}
       {openBird && <BirdPage bird={openBird} onClose={() => setOpenBird(null)} />}
     </PageContainer>
   );

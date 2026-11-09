@@ -36,7 +36,7 @@ router.get("/system/health", (_req, res) => {
 router.get("/game-state", handleGetGameState);
 router.post("/sightings/start", handleStartSighting);
 router.post("/sightings/resolve", handleResolveSighting);
-router.get("/cooldown/:assetId", handleGetCooldown);
+router.get("/cooldown", handleGetCooldown);
 router.post("/admin/settings", handleUpdateAdminSettings);
 router.post("/admin/reset-bird-count", handleResetBirdCount);
 router.post("/admin/reset-leaderboard", handleResetLeaderboard);
