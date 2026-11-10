@@ -23,11 +23,11 @@ export const BirdInfo = ({ bird, found, linksOn, showFacts = true, showCall = fa
       <BirdFact kind="behavior" label="Behavior" value={found ? bird.behavior : "???"} />
     </div>
     {showCall && (
-      <div className="bw-call w-full">
+      <div className="bw-call my-1">
         <div className="flex flex-col items-center gap-1">
           <BirdFact kind="call" label="Call" size="md" />
         </div>
-        <p className="pl-1 font-bold">{bird.call}</p>
+        <p className="pl-1 font-semibold italic text-sm">{bird.call}</p>
       </div>
     )}
     {showFacts &&

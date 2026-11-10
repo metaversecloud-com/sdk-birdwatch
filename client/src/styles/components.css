@@ -113,10 +113,10 @@ body {
   height: 60%;
 }
 .bw-fact__icon--sm {
-  width: 45px;
+  width: 35px;
 }
 .bw-fact__icon--md {
-  width: 55px;
+  width: 50px;
 }
 /* Fact / clue tile colors: single source for bird-card facts and Mystery Bird clues.
    Kinds match FACT_ICONS in data/factIcons.ts. */

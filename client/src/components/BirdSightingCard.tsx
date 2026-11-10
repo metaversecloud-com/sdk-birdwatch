@@ -4,6 +4,7 @@ import { nawbById } from "@/data/nawb";
 import { discoveredBirdImage } from "@/utils";
 import { BirdToken } from "./BirdToken";
 import Spinner from "./Spinner";
+import { BirdFact } from "./sightingResult";
 
 interface Props {
   sighting: VisitorInFlightSighting;
@@ -37,7 +38,14 @@ export const BirdSightingCard = ({ sighting, mode, onPick, disabled }: Props) =>
           />
         )}
       </div>
-      {bird?.call && <p className="bw-sighting-call text-center">Call: {bird.call}</p>}
+      {bird?.call && (
+        <div className="bw-call my-1">
+          <div className="flex flex-col items-center gap-1">
+            <BirdFact kind="call" label="Call" size="sm" />
+          </div>
+          <p className="pl-1 text-sm italic font-semibold">{bird.call}</p>
+        </div>
+      )}
       <h3 className="text-center m-0">Which bird is this?</h3>
       <div className="flex flex-col gap-2">
         {sighting.choiceBirdIds.map((bid, i) => {

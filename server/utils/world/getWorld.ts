@@ -24,6 +24,7 @@ export const emptyWorldState = (): WorldState => ({
   adminSettings: { ...DEFAULT_ADMIN_SETTINGS },
   collections: {},
   leaderboard: {},
+  leaderboardSpecies: {},
 });
 
 /**
@@ -46,6 +47,7 @@ export const getWorld = async (credentials: Credentials): Promise<IWorld> => {
       const updates: DataObjectPatch = {};
       if (!current.collections) updates["collections"] = {};
       if (!current.leaderboard) updates["leaderboard"] = {};
+      if (!current.leaderboardSpecies) updates["leaderboardSpecies"] = {};
       if (!current.adminSettings) updates["adminSettings"] = { ...DEFAULT_ADMIN_SETTINGS };
       if (Object.keys(updates).length) {
         await world.updateDataObject(updates, {}).catch(() => undefined);

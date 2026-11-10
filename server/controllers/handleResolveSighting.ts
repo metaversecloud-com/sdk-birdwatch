@@ -132,14 +132,23 @@ export const handleResolveSighting = async (req: Request, res: Response) => {
       fireLegendaryAlert = true;
     }
 
-    // Leaderboard species count = the player's Field Guide size.
-    const nextLeaderboard = upsertEntry(
-      worldData.leaderboard || {},
-      profileId,
-      displayName || "Anonymous",
-      fieldGuideBirdIds.size,
-      now,
-    );
+    // Leaderboard species count = species this player has found in this world. Inventory can't
+    // answer that (it doesn't know where a bird was found), so the list lives on the world.
+    // Only a new species here changes the entry, so `reachedAt` stays a fair tiebreak.
+    const speciesHere = worldData.leaderboardSpecies?.[profileId] || [];
+    const isNewSpeciesHere = !speciesHere.includes(rightBird.id);
+    const leaderboardPatch: DataObjectPatch = isNewSpeciesHere
+      ? {
+          [`leaderboardSpecies.${profileId}`]: [...speciesHere, rightBird.id],
+          leaderboard: upsertEntry(
+            worldData.leaderboard || {},
+            profileId,
+            displayName || "Anonymous",
+            speciesHere.length + 1,
+            now,
+          ),
+        }
+      : {};
 
     // Update world data object.
     const worldPatch: DataObjectPatch = {
@@ -148,7 +157,7 @@ export const handleResolveSighting = async (req: Request, res: Response) => {
       [`collections.${inFlight.collectionId}.perPlayerContribution`]: nextPerPlayer,
       [`collections.${inFlight.collectionId}.rarestSighting`]: nextRarest,
       [`collections.${inFlight.collectionId}.activeLegendaryAlert`]: nextLegendaryAlert,
-      leaderboard: nextLeaderboard,
+      ...leaderboardPatch,
     };
     await world.updateDataObject(worldPatch, {
       analytics: [

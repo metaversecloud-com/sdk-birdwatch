@@ -149,6 +149,58 @@ describe("Birdwatch routes", () => {
     );
   });
 
+  const seedCardinalInFlight = () => {
+    topiaMock.visitorSeed = {
+      "world-scene-1": {
+        spotCooldowns: {},
+        inFlight: {
+          "asset-spot-feeder": {
+            collectionId: "north_american_winter_birds",
+            birdId: "northern_cardinal",
+            choiceBirdIds: ["black_capped_chickadee", "northern_cardinal", "house_finch"],
+          },
+        },
+      },
+    };
+  };
+
+  test("POST /sightings/resolve leaderboard counts species found in this world, not the whole Field Guide", async () => {
+    const spotCreds = { ...CREDS, assetId: "asset-spot-feeder", uniqueName: "Birdwatch_spot" };
+    // Field Guide has two other species from other worlds; none found here yet.
+    topiaMock.visitorInventoryItems = [
+      { id: "ui-1", quantity: 1, item: { name: "Blue Jay", type: "ITEM", metadata: { birdId: "blue_jay" } } },
+      { id: "ui-2", quantity: 1, item: { name: "House Finch", type: "ITEM", metadata: { birdId: "house_finch" } } },
+    ];
+    seedCardinalInFlight();
+    const res = await request(makeApp())
+      .post("/api/sightings/resolve")
+      .query(spotCreds)
+      .send({ pickedBirdId: "northern_cardinal" });
+    expect(res.status).toBe(200);
+    const world = topiaMock.lastWorld.dataObject;
+    expect(world.leaderboardSpecies.p1).toEqual(["northern_cardinal"]);
+    expect(world.leaderboard.p1.split("|")[1]).toBe("1");
+  });
+
+  test("POST /sightings/resolve a species already found here leaves the leaderboard entry alone", async () => {
+    const spotCreds = { ...CREDS, assetId: "asset-spot-feeder", uniqueName: "Birdwatch_spot" };
+    topiaMock.worldSeed = {
+      adminSettings: { identificationMode: "description", cooldownSeconds: 60, allAboutBirdsLinksEnabled: true },
+      collections: {},
+      leaderboard: { p1: "You|1|1000" },
+      leaderboardSpecies: { p1: ["northern_cardinal"] },
+    };
+    seedCardinalInFlight();
+    const res = await request(makeApp())
+      .post("/api/sightings/resolve")
+      .query(spotCreds)
+      .send({ pickedBirdId: "northern_cardinal" });
+    expect(res.status).toBe(200);
+    const world = topiaMock.lastWorld.dataObject;
+    expect(world.leaderboard.p1).toBe("You|1|1000");
+    expect(world.leaderboardSpecies.p1).toEqual(["northern_cardinal"]);
+  });
+
   test("POST /admin/settings rejects non-admins", async () => {
     topiaMock.visitorIsAdmin = false;
     const res = await request(makeApp())
@@ -175,10 +227,12 @@ describe("Birdwatch routes", () => {
       adminSettings: { identificationMode: "description", cooldownSeconds: 60, allAboutBirdsLinksEnabled: true },
       collections: {},
       leaderboard: { p1: "You|5|1000" },
+      leaderboardSpecies: { p1: ["northern_cardinal"] },
     };
     const res = await request(makeApp()).post("/api/admin/reset-leaderboard").query(CREDS);
     expect(res.status).toBe(200);
     expect(res.body.data.leaderboard).toEqual({});
+    expect(topiaMock.lastWorld.dataObject.leaderboardSpecies).toEqual({});
   });
 
   test("POST /mystery/guess validates body and resolves correct answer", async () => {

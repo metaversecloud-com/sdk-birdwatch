@@ -72,6 +72,12 @@ export interface WorldState {
   adminSettings: AdminSettings;
   collections: Record<string, CollectionWorldState>;
   leaderboard: Record<string, LeaderboardEntryString>;
+  /**
+   * profileId → species found in this world, across every Collection. Inventory can't say
+   * which world a bird was found in, so the leaderboard's species count is kept here.
+   * Cleared with the leaderboard; untouched by a Bird Count reset.
+   */
+  leaderboardSpecies: Record<string, string[]>;
 }
 
 export interface VisitorInFlightSighting {

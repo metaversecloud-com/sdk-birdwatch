@@ -116,7 +116,7 @@ export class WorldFactory {
   create(urlSlug: string, _opts: any) {
     (__mock as any).lastWorldCreateArgs = { urlSlug };
     const holder = makeDataHolder((__mock as any).worldSeed || {});
-    return {
+    const world = {
       ...holder,
       urlSlug,
       fetchDroppedAssetsBySceneDropId: jest
@@ -125,6 +125,8 @@ export class WorldFactory {
       triggerParticle: jest.fn().mockResolvedValue(undefined),
       fireToast,
     };
+    (__mock as any).lastWorld = world;
+    return world;
   }
 }
 

@@ -49,7 +49,7 @@ All endpoints accept the standard Topia iframe credentials via query params; `fo
 
 ## Data Objects
 
-Anything the visitor's inventory can answer is **not** stored in a data object. The Field Guide is the visitor's species inventory items: one unit is added per correct ID, so an item's quantity is "times spotted", and the sum of quantities is the lifetime correct-ID count. Badges, "new species", times spotted and the leaderboard species count are all derived from it.
+Anything the visitor's inventory can answer is **not** stored in a data object. The Field Guide is the visitor's species inventory items: one unit is added per correct ID, so an item's quantity is "times spotted", and the sum of quantities is the lifetime correct-ID count. Badges, "new species" and times spotted are all derived from it. The one exception is the leaderboard: it ranks species found **in this world**, and inventory doesn't record where a bird was found, so the world keeps its own per-player species list (`leaderboardSpecies`).
 
 ### World data object (flat, no app wrapper)
 
@@ -58,6 +58,7 @@ interface WorldState {
   adminSettings: { identificationMode; cooldownSeconds; allAboutBirdsLinksEnabled };
   collections: Record<collectionId, CollectionWorldState>;
   leaderboard: Record<profileId, "displayName|speciesCount|reachedAt">; // pipe-concat strings keep the record small
+  leaderboardSpecies: Record<profileId, birdId[]>; // species found in this world; cleared with the leaderboard, not by a Bird Count reset
 }
 
 interface CollectionWorldState {
