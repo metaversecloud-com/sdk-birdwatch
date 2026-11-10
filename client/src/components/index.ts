@@ -10,6 +10,7 @@ export { BirdSightingCard } from "./BirdSightingCard";
 export { CooldownScreen } from "./CooldownScreen";
 export { WorldBirdCountTab } from "./WorldBirdCountTab";
 export { FieldGuideTab } from "./FieldGuideTab";
+export { BirdProfile } from "./BirdProfile";
 export { BirdPage } from "./BirdPage";
 export { LeaderboardTab } from "./LeaderboardTab";
 export { BadgesTab } from "./BadgesTab";

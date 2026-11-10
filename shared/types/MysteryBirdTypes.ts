@@ -1,4 +1,4 @@
-export type ClueType = "Looks" | "Spot" | "Eats" | "Nests" | "Behavior";
+export type ClueType = "Looks" | "Spot" | "Eats" | "Nests" | "Behavior" | "Call";
 
 export interface MysteryClue {
   type: ClueType;

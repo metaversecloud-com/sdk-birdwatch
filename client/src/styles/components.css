@@ -107,8 +107,16 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  font-size: 2.1rem;
+}
+.bw-fact__icon img {
+  width: 60%;
+  height: 60%;
+}
+.bw-fact__icon--sm {
+  width: 45px;
+}
+.bw-fact__icon--md {
+  width: 55px;
 }
 /* Fact / clue tile colors: single source for bird-card facts and Mystery Bird clues.
    Kinds match FACT_ICONS in data/factIcons.ts. */
@@ -126,6 +134,9 @@ body {
 }
 .bw-fact-color--behavior {
   background: var(--bw-primary);
+}
+.bw-fact-color--call {
+  background: var(--bw-mystery);
 }
 .bw-fact__label {
   margin: 0;
@@ -782,16 +793,6 @@ body {
   font-weight: 700;
   line-height: 1.1rem;
 }
-.bw-clue__icon {
-  width: 2.2rem;
-  height: 2.2rem;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 1.1rem;
-}
 .bw-clue__short {
   font-size: 0.8rem;
   line-height: 1.1;
@@ -856,19 +857,8 @@ body {
   gap: 0.6rem;
   padding: 0.6rem 0.8rem;
   border-radius: var(--bw-radius-sm);
-  background: var(--bw-snow);
+  background: var(--bw-mystery-soft);
   text-align: left;
-}
-.bw-call__icon {
-  flex-shrink: 0;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bw-mystery);
-  color: #fff;
 }
 
 .bw-mystery-result {
@@ -904,6 +894,7 @@ body {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   transform: rotate(-3deg);
+  margin: 4px auto;
 }
 
 /* Reduce motion for the progress fill */

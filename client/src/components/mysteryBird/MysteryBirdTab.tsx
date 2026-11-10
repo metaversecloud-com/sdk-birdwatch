@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 
 // components
-import { BirdToken } from "@/components";
+import { BirdFact, BirdToken } from "@/components";
 import { MysteryCandidateCard } from "./MysteryCandidateCard";
 
 // context
@@ -11,7 +11,7 @@ import { ErrorType, SET_MYSTERY_BIRD } from "@/context/types";
 // utils
 import { backendAPI, discoveredBirdImage, setErrorMessage } from "@/utils";
 import { nawbById, nawbCollection } from "@/data/nawb";
-import { FACT_ICONS, clueFactKind } from "@/data/factIcons";
+import { clueFactKind } from "@/data/factIcons";
 
 import { MAX_MYSTERY_GUESSES, SPOT_LABELS } from "@shared/types";
 import type { MysteryBirdView } from "@shared/types";
@@ -55,7 +55,7 @@ export const MysteryBirdTab = () => {
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-2">
         <div className="bw-mystery-banner">
-          <div className="flex flex-col items-center gap-1 min-w-[180px]">
+          <div className="grid flex-col gap-1 min-w-[180px] text-left">
             <strong>Today's Mystery Bird</strong>
             <p className="text-xs m-0">{nawbCollection.name}</p>
           </div>
@@ -90,11 +90,7 @@ export const MysteryBirdTab = () => {
               <span className="bw-clue__info" aria-hidden="true">
                 i
               </span>
-              <span className={`bw-clue__icon bw-fact-color--${clueFactKind(clue.type)}`} aria-hidden="true">
-                {FACT_ICONS[clueFactKind(clue.type)]}
-              </span>
-              <span className="bw-caption">{clue.type}</span>
-              <strong className="bw-clue__short">{clue.short}</strong>
+              <BirdFact kind={clueFactKind(clue.type)} label={clue.type} value={clue.short} size="sm" />
             </button>
           ))}
         </div>
