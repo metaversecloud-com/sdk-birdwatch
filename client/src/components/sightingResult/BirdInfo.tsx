@@ -16,7 +16,7 @@ interface Props {
 
 export const BirdInfo = ({ bird, found, linksOn, showFacts = true, showCall = false }: Props) => (
   <div className="flex flex-col gap-4 text-left">
-    <div className="bw-fact-grid">
+    <div className="bw-fact-grid pt-2">
       <BirdFact kind="spot" label="Spot" value={SPOT_LABELS[bird.spot]} />
       <BirdFact kind="eats" label="Eats" value={found ? bird.eats.join(", ") : "???"} />
       <BirdFact kind="nests" label="Nests" value={found ? bird.nests.join(", ") : "???"} />

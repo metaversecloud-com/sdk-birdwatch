@@ -30,14 +30,14 @@ export const BirdProfile = ({
   showCall,
   children,
 }: Props) => (
-  <div className="flex flex-col items-center gap-4 text-center">
+  <div className="flex flex-col items-center gap-2 text-center">
     <BirdToken
       birdId={bird.id}
       rarity={bird.rarity}
       src={revealed ? discoveredBirdImage(bird.id) : undiscoveredBirdImage(bird.id)}
       size="lg"
     />
-    <h2 className="m-0">{bird.name}</h2>
+    <h2>{bird.name}</h2>
     <RarityChip rarity={bird.rarity} />
     {!found && <span className="bw-chip">Not found yet</span>}
     {children}
