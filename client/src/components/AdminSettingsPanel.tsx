@@ -22,6 +22,7 @@ const DIFFICULTY_TEXT: Record<MilestoneDifficulty, { label: string; hint: string
   easy: { label: "Easy", hint: "Half the goals. Good for small groups or short events." },
   default: { label: "Default", hint: "The standard goals." },
   hard: { label: "Hard", hint: "Double the goals. For big or long-running worlds." },
+  very_hard: { label: "Very Hard", hint: "Eight times the goals. For very large worlds or season-long play." },
 };
 
 const formatGoals = (c: MilestoneConfig) => [c.m1, c.m2, c.m3].map((g) => g.toLocaleString()).join(" / ");
@@ -158,9 +159,8 @@ export const AdminSettingsPanel = ({ onBack, onRefresh }: { onBack?: () => void;
         </div>
         {skipped.length > 0 && difficulty !== "custom" && (
           <p className="bw-settings-error" role="alert">
-            The World Bird Count is already {totalSightings.toLocaleString()}, so{" "}
-            {DIFFICULTY_TEXT[difficulty].label} would unlock{" "}
-            {skipped.length === 1 ? "a milestone" : `${skipped.length} milestones`} without celebrating{" "}
+            The World Bird Count is already {totalSightings.toLocaleString()}, so {DIFFICULTY_TEXT[difficulty].label}{" "}
+            would unlock {skipped.length === 1 ? "a milestone" : `${skipped.length} milestones`} without celebrating{" "}
             {skipped.length === 1 ? "it" : "them"}. Pick a harder option.
           </p>
         )}

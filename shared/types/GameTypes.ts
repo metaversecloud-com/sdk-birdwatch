@@ -35,10 +35,15 @@ export const DEFAULT_MILESTONES: MilestoneConfig = { m1: 500, m2: 1500, m3: 2500
 export const MILESTONE_KEYS = ["m1", "m2", "m3"] as const;
 export type MilestoneKey = (typeof MILESTONE_KEYS)[number];
 
-export const MILESTONE_DIFFICULTIES = ["easy", "default", "hard"] as const;
+export const MILESTONE_DIFFICULTIES = ["easy", "default", "hard", "very_hard"] as const;
 export type MilestoneDifficulty = (typeof MILESTONE_DIFFICULTIES)[number];
 
-const DIFFICULTY_MULTIPLIER: Record<MilestoneDifficulty, number> = { easy: 0.5, default: 1, hard: 2 };
+const DIFFICULTY_MULTIPLIER: Record<MilestoneDifficulty, number> = {
+  easy: 0.5,
+  default: 1,
+  hard: 2,
+  very_hard: 8,
+};
 
 export const milestonesForDifficulty = (difficulty: MilestoneDifficulty): MilestoneConfig => ({
   m1: DEFAULT_MILESTONES.m1 * DIFFICULTY_MULTIPLIER[difficulty],

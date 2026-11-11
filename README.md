@@ -97,7 +97,7 @@ Keying by `${urlSlug}-${sceneDropId}` lets one visitor's data cover multiple Bir
 
 ```ts
 // keyAsset.dataObject  = { collectionId, milestones? }
-//   milestones: "easy" | "default" | "hard" (0.5x / 1x / 2x of 500 / 1,500 / 2,500), or custom { m1, m2, m3 }
+//   milestones: "easy" | "default" | "hard" | "very_hard" (0.5x / 1x / 2x / 8x of 500 / 1,500 / 2,500), or custom { m1, m2, m3 }
 //   set by hand in the data object (ascending positive integers; anything invalid falls back to Default).
 //   Admins pick the difficulty in settings; custom goals show as "Custom" and can only be replaced, not edited.
 // spotAsset.dataObject = { collectionId, spot }

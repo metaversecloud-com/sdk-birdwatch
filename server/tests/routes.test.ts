@@ -282,6 +282,18 @@ describe("Birdwatch routes", () => {
     expect(topiaMock.lastDroppedAsset.dataObject.milestones).toBe("default");
   });
 
+  test("POST /admin/settings saves Very Hard goals", async () => {
+    topiaMock.visitorIsAdmin = true;
+    seedWorldCount(100);
+    const res = await request(makeApp())
+      .post("/api/admin/settings")
+      .query(CREDS)
+      .send({ milestoneDifficulty: "very_hard" });
+    expect(res.status).toBe(200);
+    expect(res.body.data.milestones).toEqual({ difficulty: "very_hard", config: { m1: 4000, m2: 12000, m3: 20000 } });
+    expect(topiaMock.lastDroppedAsset.dataObject.milestones).toBe("very_hard");
+  });
+
   test("POST /admin/settings rejects an unknown milestoneDifficulty", async () => {
     topiaMock.visitorIsAdmin = true;
     const res = await request(makeApp())
