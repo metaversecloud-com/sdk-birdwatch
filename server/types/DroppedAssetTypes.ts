@@ -1,8 +1,9 @@
 import { DroppedAssetInterface, VisitorInterface, WorldInterface, InventoryItemInterface } from "@rtsdk/topia";
-import type { AdminSettings, WorldState, SpotKey, VisitorPerScene } from "@shared/types/index.js";
+import type { AdminSettings, MilestoneSetting, WorldState, SpotKey, VisitorPerScene } from "@shared/types/index.js";
 
 export interface IKeyAsset extends DroppedAssetInterface {
-  dataObject: { collectionId?: string };
+  /** `milestones`: "easy" | "default" | "hard", or custom `{ m1, m2, m3 }` set by hand. Missing = Default. */
+  dataObject: { collectionId?: string; milestones?: MilestoneSetting };
 }
 
 export interface ISpotAsset extends DroppedAssetInterface {

@@ -27,7 +27,7 @@ Three unique names — the **same across every Collection** and every spot type.
 - **Core loop** — click a spot → one bird + three choices → pick → result + optional cooldown.
 - **Field Guide** — per-player per-world, sourced from ecosystem inventory items (one per species).
 - **World Bird Count** — per-Collection running total, with three milestones that give everyone in the world rare/legendary visit bonuses + a Champion Birder badge.
-- **Trophy** — Leaderboard (top 25 unique species in this world, ties go to first-reach) + Badges.
+- **Trophy** — Leaderboard (top 25 by birds spotted in this world, the same count as "You've added" on the World Bird Count; ties go to first-reach) + Badges.
 - **Admin Settings** — identification mode (Description / Picture Match), per-spot cooldown (1 / 2 / 5 min or 1 h), Learn-more toggle, reset World Bird Count.
 - **Legendary Alert** — when any player IDs the Legendary, every player's next click on the matching spot type within 5 min skips cooldown and is guaranteed to show that bird.
 - **Mystery Bird (v1 stretch)** — daily puzzle: 3 clues, 4 candidates, 2 guesses. Per-player random pick on ET rollover.
@@ -40,7 +40,7 @@ Three unique names — the **same across every Collection** and every spot type.
 | `POST` | `/api/sightings/start`         | —                                | `{ success, reused, data: { spot, sighting: VisitorInFlightSighting \| null } }` (`null` while the spot is resting)                                                                          |
 | `POST` | `/api/sightings/resolve`       | `{ pickedBirdId }`               | `{ success, data: { outcome: "new_species" \| "repeat" \| "wrong", rightBird, pickedBird, timesSpotted?, grantedBadges, milestoneCrossed?, newTotalSightings?, yourSpeciesCount? } }` |
 | `GET`  | `/api/cooldown`                | —                                | `{ success, data: { remainingSeconds, spotsToTry: SpotStatus[], activeLegendaryAlert? } }`                                                                                            |
-| `POST` | `/api/admin/settings`          | `Partial<AdminSettings>`         | `{ success, data: { adminSettings } }` (admin only)                                                                                                                                   |
+| `POST` | `/api/admin/settings`          | `Partial<AdminSettings> & { milestoneDifficulty? }` | `{ success, data: { adminSettings, milestones? } }` (admin only). `milestoneDifficulty` is written to the key asset; 400 if it would make a milestone not reached yet count as reached |
 | `POST` | `/api/admin/reset-bird-count`  | —                                | `{ success, data: { reset: n } }` (admin only)                                                                                                                                        |
 | `POST` | `/api/admin/reset-leaderboard` | —                                | `{ success, data: { leaderboard: {} } }` (admin only)                                                                                                                                 |
 | `POST` | `/api/mystery/guess`           | `{ collectionId, pickedBirdId }` | `{ success, data: { outcome: "solved" \| "wrong" \| "out", mysteryBird: MysteryBirdView } }` (answer withheld until done) |
@@ -49,7 +49,7 @@ All endpoints accept the standard Topia iframe credentials via query params; `fo
 
 ## Data Objects
 
-Anything the visitor's inventory can answer is **not** stored in a data object. The Field Guide is the visitor's species inventory items: one unit is added per correct ID, so an item's quantity is "times spotted", and the sum of quantities is the lifetime correct-ID count. Badges, "new species" and times spotted are all derived from it. The one exception is the leaderboard: it ranks species found **in this world**, and inventory doesn't record where a bird was found, so the world keeps its own per-player species list (`leaderboardSpecies`).
+Anything the visitor's inventory can answer is **not** stored in a data object. The Field Guide is the visitor's species inventory items: one unit is added per correct ID, so an item's quantity is "times spotted", and the sum of quantities is the lifetime correct-ID count. Badges, "new species" and times spotted are all derived from it.
 
 ### World data object (flat, no app wrapper)
 
@@ -57,8 +57,7 @@ Anything the visitor's inventory can answer is **not** stored in a data object. 
 interface WorldState {
   adminSettings: { identificationMode; cooldownSeconds; allAboutBirdsLinksEnabled };
   collections: Record<collectionId, CollectionWorldState>;
-  leaderboard: Record<profileId, "displayName|speciesCount|reachedAt">; // pipe-concat strings keep the record small
-  leaderboardSpecies: Record<profileId, birdId[]>; // species found in this world; cleared with the leaderboard, not by a Bird Count reset
+  leaderboard: Record<profileId, "displayName|sightings|reachedAt">; // sightings = perPlayerContribution summed across Collections ("You've added")
 }
 
 interface CollectionWorldState {
@@ -71,7 +70,7 @@ interface CollectionWorldState {
 }
 ```
 
-`milestones` and `mostSpotted` are derived from `totalSightings` / `perBirdSightings` on read (`toCollectionView`) and never stored.
+`milestones` and `mostSpotted` are derived from `totalSightings` / `perBirdSightings` on read (`toCollectionView`) and never stored. Milestone goals come from the scene's key asset (see Asset data objects).
 
 ### Visitor data object (flat, scene entries keyed by `${urlSlug}-${sceneDropId}`)
 
@@ -97,7 +96,10 @@ Keying by `${urlSlug}-${sceneDropId}` lets one visitor's data cover multiple Bir
 ### Asset data objects
 
 ```ts
-// keyAsset.dataObject  = { collectionId }
+// keyAsset.dataObject  = { collectionId, milestones? }
+//   milestones: "easy" | "default" | "hard" (0.5x / 1x / 2x of 500 / 1,500 / 2,500), or custom { m1, m2, m3 }
+//   set by hand in the data object (ascending positive integers; anything invalid falls back to Default).
+//   Admins pick the difficulty in settings; custom goals show as "Custom" and can only be replaced, not edited.
 // spotAsset.dataObject = { collectionId, spot }
 // trophy.dataObject    = {} (no app state)
 ```

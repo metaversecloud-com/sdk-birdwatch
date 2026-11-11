@@ -1,7 +1,5 @@
-import type { CollectionWorldState, MilestoneConfig, MilestoneState } from "@shared/types/index.js";
+import type { CollectionWorldState, MilestoneConfig, MilestoneKey, MilestoneState } from "@shared/types/index.js";
 import { DEFAULT_MILESTONES } from "@shared/types/index.js";
-
-export type MilestoneKey = "m1" | "m2" | "m3";
 
 /** Milestones are derived from the World Bird Count, never stored. */
 export const milestoneStateFor = (total: number, config: MilestoneConfig = DEFAULT_MILESTONES): MilestoneState => ({

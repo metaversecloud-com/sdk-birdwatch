@@ -2,8 +2,14 @@ import { useContext, useState } from "react";
 import { backendAPI, setErrorMessage } from "@/utils";
 import { GlobalDispatchContext, GlobalStateContext } from "@/context/GlobalContext";
 import { ErrorType } from "@/context/types";
-import type { CooldownOption, IdentificationMode } from "@shared/types";
-import { COOLDOWN_OPTIONS } from "@shared/types";
+import type { CooldownOption, IdentificationMode, MilestoneConfig, MilestoneDifficulty } from "@shared/types";
+import {
+  COOLDOWN_OPTIONS,
+  DEFAULT_MILESTONES,
+  MILESTONE_DIFFICULTIES,
+  milestonesForDifficulty,
+  milestonesSkippedBySwitch,
+} from "@shared/types";
 
 const COOLDOWN_LABELS: Record<CooldownOption, string> = {
   60: "1 min",
@@ -12,6 +18,14 @@ const COOLDOWN_LABELS: Record<CooldownOption, string> = {
   3600: "1 hour",
 };
 
+const DIFFICULTY_TEXT: Record<MilestoneDifficulty, { label: string; hint: string }> = {
+  easy: { label: "Easy", hint: "Half the goals. Good for small groups or short events." },
+  default: { label: "Default", hint: "The standard goals." },
+  hard: { label: "Hard", hint: "Double the goals. For big or long-running worlds." },
+};
+
+const formatGoals = (c: MilestoneConfig) => [c.m1, c.m2, c.m3].map((g) => g.toLocaleString()).join(" / ");
+
 export const AdminSettingsPanel = ({ onBack, onRefresh }: { onBack?: () => void; onRefresh: () => void }) => {
   const dispatch = useContext(GlobalDispatchContext);
   const { gameState } = useContext(GlobalStateContext);
@@ -19,6 +33,20 @@ export const AdminSettingsPanel = ({ onBack, onRefresh }: { onBack?: () => void;
   const [mode, setMode] = useState<IdentificationMode>(s?.identificationMode || "description");
   const [cd, setCd] = useState<CooldownOption>((s?.cooldownSeconds as CooldownOption) || 60);
   const [links, setLinks] = useState<boolean>(s?.allAboutBirdsLinksEnabled !== false);
+  const currentMilestones = gameState?.milestones;
+  const currentDifficulty = currentMilestones?.difficulty || "default";
+  const [difficulty, setDifficulty] = useState<MilestoneDifficulty | "custom">(currentDifficulty);
+  const totalSightings = gameState?.worldState?.totalSightings || 0;
+  const difficultyChanged = difficulty !== "custom" && difficulty !== currentDifficulty;
+  // A switch can't make a milestone that isn't reached yet count as reached, since it would
+  // never fire (no toast, no Champion Birder badge).
+  const skipped = difficultyChanged
+    ? milestonesSkippedBySwitch(
+        currentMilestones?.config || DEFAULT_MILESTONES,
+        milestonesForDifficulty(difficulty),
+        totalSightings,
+      )
+    : [];
   const [saving, setSaving] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
 
@@ -29,6 +57,7 @@ export const AdminSettingsPanel = ({ onBack, onRefresh }: { onBack?: () => void;
         identificationMode: mode,
         cooldownSeconds: cd,
         allAboutBirdsLinksEnabled: links,
+        ...(difficultyChanged ? { milestoneDifficulty: difficulty } : {}),
       });
       onRefresh();
       onBack?.();
@@ -97,7 +126,47 @@ export const AdminSettingsPanel = ({ onBack, onRefresh }: { onBack?: () => void;
         </label>
       </div>
 
-      <button className="bw-btn-primary" onClick={save} disabled={saving}>
+      <div className="bw-card">
+        <strong>Milestone difficulty</strong>
+        <p className="bw-subtitle">World Bird Count goals for the three milestones.</p>
+        <div className="flex flex-col gap-2 mt-2">
+          {MILESTONE_DIFFICULTIES.map((v) => (
+            <label key={v} className="flex items-start gap-2">
+              <input type="radio" name="difficulty" checked={difficulty === v} onChange={() => setDifficulty(v)} />
+              <span>
+                <strong>{DIFFICULTY_TEXT[v].label}</strong> · {formatGoals(milestonesForDifficulty(v))}
+                <br />
+                <span className="bw-subtitle">{DIFFICULTY_TEXT[v].hint}</span>
+              </span>
+            </label>
+          ))}
+          {currentDifficulty === "custom" && currentMilestones && (
+            <label className="flex items-start gap-2">
+              <input
+                type="radio"
+                name="difficulty"
+                checked={difficulty === "custom"}
+                onChange={() => setDifficulty("custom")}
+              />
+              <span>
+                <strong>Custom</strong> · {formatGoals(currentMilestones.config)}
+                <br />
+                <span className="bw-subtitle">Set for this world. Pick another option to replace it.</span>
+              </span>
+            </label>
+          )}
+        </div>
+        {skipped.length > 0 && difficulty !== "custom" && (
+          <p className="bw-settings-error" role="alert">
+            The World Bird Count is already {totalSightings.toLocaleString()}, so{" "}
+            {DIFFICULTY_TEXT[difficulty].label} would unlock{" "}
+            {skipped.length === 1 ? "a milestone" : `${skipped.length} milestones`} without celebrating{" "}
+            {skipped.length === 1 ? "it" : "them"}. Pick a harder option.
+          </p>
+        )}
+      </div>
+
+      <button className="bw-btn-primary" onClick={save} disabled={saving || skipped.length > 0}>
         {saving ? "Saving..." : "Save"}
       </button>
 

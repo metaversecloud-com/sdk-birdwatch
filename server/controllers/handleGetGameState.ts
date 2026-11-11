@@ -4,6 +4,7 @@ import {
   getVisitor,
   getWorld,
   getKeyAsset,
+  getSceneMilestones,
   getSpotAsset,
   getCredentials,
   ensureCollectionState,
@@ -23,6 +24,7 @@ import { KeyAssetConfigError } from "@utils/droppedAssets/getKeyAsset.js";
 import { SpotAssetConfigError } from "@utils/droppedAssets/getSpotAsset.js";
 import type { GameStateResponse, VisitorPerScene } from "@shared/types/index.js";
 import { sceneKey } from "@shared/types/index.js";
+import type { IKeyAsset } from "../types/DroppedAssetTypes.js";
 import { getCollectionData } from "../data/collections/index.js";
 
 /**
@@ -43,9 +45,10 @@ export const handleGetGameState = async (req: Request, res: Response) => {
     const querySpot = typeof req.query.spot === "string" ? req.query.spot : undefined;
 
     let collectionId: string | undefined;
+    let keyAsset: IKeyAsset | undefined;
     try {
       if (uniqueName === "Birdwatch_keyAsset") {
-        const keyAsset = await getKeyAsset(credentials, queryCollectionId);
+        keyAsset = await getKeyAsset(credentials, queryCollectionId);
         collectionId = keyAsset.dataObject?.collectionId;
       } else if (uniqueName === "Birdwatch_spot") {
         const spotAsset = await getSpotAsset(credentials, queryCollectionId, querySpot);
@@ -81,7 +84,11 @@ export const handleGetGameState = async (req: Request, res: Response) => {
 
     await ensureCollectionState(world, collectionId);
     await registerPlacedCollection(world, collectionId, sceneDropId);
-    const worldState = toCollectionView(world.dataObject.collections?.[collectionId] || emptyCollectionState());
+    const milestones = await getSceneMilestones(credentials, collectionId, keyAsset);
+    const worldState = toCollectionView(
+      world.dataObject.collections?.[collectionId] || emptyCollectionState(),
+      milestones.config,
+    );
     const adminSettings = world.dataObject.adminSettings!;
     const leaderboard = world.dataObject.leaderboard || {};
 
@@ -124,6 +131,7 @@ export const handleGetGameState = async (req: Request, res: Response) => {
       sceneDropId,
       adminSettings,
       worldState,
+      milestones,
       leaderboard,
       mysteryBird,
     };

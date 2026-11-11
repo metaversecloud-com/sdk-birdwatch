@@ -9,6 +9,7 @@ import {
   rollBirdForSpot,
   pickChoices,
   milestoneStateFor,
+  getSceneMilestones,
 } from "@utils/index.js";
 import type { VisitorInFlightSighting } from "@shared/types/index.js";
 import type { DataObjectPatch } from "../types/DroppedAssetTypes.js";
@@ -75,9 +76,17 @@ export const handleStartSighting = async (req: Request, res: Response) => {
     const data = getCollectionData(spotMeta.collectionId);
     if (!data) return res.status(400).json({ success: false, message: "Unknown collection." });
 
+    // Milestone goals come from the scene's key asset; only a normal roll needs them.
     const rightBird = isLegendarySkip
       ? data.birdsById[activeAlert!.birdId]
-      : rollBirdForSpot(spotMeta.collectionId, spotMeta.spot, milestoneStateFor(collectionState?.totalSightings || 0));
+      : rollBirdForSpot(
+          spotMeta.collectionId,
+          spotMeta.spot,
+          milestoneStateFor(
+            collectionState?.totalSightings || 0,
+            (await getSceneMilestones(credentials, spotMeta.collectionId)).config,
+          ),
+        );
 
     const [a, b, c] = pickChoices(spotMeta.collectionId, spotMeta.spot, rightBird);
 

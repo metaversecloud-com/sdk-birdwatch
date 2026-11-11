@@ -164,31 +164,14 @@ describe("Birdwatch routes", () => {
     };
   };
 
-  test("POST /sightings/resolve leaderboard counts species found in this world, not the whole Field Guide", async () => {
-    const spotCreds = { ...CREDS, assetId: "asset-spot-feeder", uniqueName: "Birdwatch_spot" };
-    // Field Guide has two other species from other worlds; none found here yet.
-    topiaMock.visitorInventoryItems = [
-      { id: "ui-1", quantity: 1, item: { name: "Blue Jay", type: "ITEM", metadata: { birdId: "blue_jay" } } },
-      { id: "ui-2", quantity: 1, item: { name: "House Finch", type: "ITEM", metadata: { birdId: "house_finch" } } },
-    ];
-    seedCardinalInFlight();
-    const res = await request(makeApp())
-      .post("/api/sightings/resolve")
-      .query(spotCreds)
-      .send({ pickedBirdId: "northern_cardinal" });
-    expect(res.status).toBe(200);
-    const world = topiaMock.lastWorld.dataObject;
-    expect(world.leaderboardSpecies.p1).toEqual(["northern_cardinal"]);
-    expect(world.leaderboard.p1.split("|")[1]).toBe("1");
-  });
-
-  test("POST /sightings/resolve a species already found here leaves the leaderboard entry alone", async () => {
+  test("POST /sightings/resolve leaderboard count matches the World Bird Count's \"You've added\"", async () => {
     const spotCreds = { ...CREDS, assetId: "asset-spot-feeder", uniqueName: "Birdwatch_spot" };
     topiaMock.worldSeed = {
       adminSettings: { identificationMode: "description", cooldownSeconds: 60, allAboutBirdsLinksEnabled: true },
-      collections: {},
-      leaderboard: { p1: "You|1|1000" },
-      leaderboardSpecies: { p1: ["northern_cardinal"] },
+      collections: {
+        north_american_winter_birds: { totalSightings: 4, perBirdSightings: {}, perPlayerContribution: { p1: 4 } },
+      },
+      leaderboard: { p1: "You|2|1000" },
     };
     seedCardinalInFlight();
     const res = await request(makeApp())
@@ -197,8 +180,8 @@ describe("Birdwatch routes", () => {
       .send({ pickedBirdId: "northern_cardinal" });
     expect(res.status).toBe(200);
     const world = topiaMock.lastWorld.dataObject;
-    expect(world.leaderboard.p1).toBe("You|1|1000");
-    expect(world.leaderboardSpecies.p1).toEqual(["northern_cardinal"]);
+    expect(world.collections.north_american_winter_birds.perPlayerContribution.p1).toBe(5);
+    expect(world.leaderboard.p1.split("|")[1]).toBe("5");
   });
 
   test("POST /admin/settings rejects non-admins", async () => {
@@ -221,18 +204,116 @@ describe("Birdwatch routes", () => {
     expect(res.body.data.adminSettings.cooldownSeconds).toBe(120);
   });
 
+  const ADMIN_SETTINGS = { identificationMode: "description", cooldownSeconds: 60, allAboutBirdsLinksEnabled: true };
+  const seedWorldCount = (totalSightings: number) => {
+    topiaMock.worldSeed = {
+      adminSettings: ADMIN_SETTINGS,
+      collections: {
+        north_american_winter_birds: { totalSightings, perBirdSightings: {}, perPlayerContribution: {} },
+      },
+      leaderboard: {},
+    };
+  };
+  const setKeyAssetMilestones = (milestones: unknown) => {
+    topiaMock.droppedAssetSeed["asset-key"] = { collectionId: "north_american_winter_birds", milestones };
+    const key = topiaMock.sceneAssets.find((a: any) => a.id === "asset-key");
+    key.dataObject = { ...key.dataObject, milestones };
+  };
+
+  test("GET /game-state returns Default milestones when the key asset has no setting", async () => {
+    const res = await request(makeApp()).get("/api/game-state").query(CREDS);
+    expect(res.body.data.milestones).toEqual({ difficulty: "default", config: { m1: 500, m2: 1500, m3: 2500 } });
+  });
+
+  test("GET /game-state reads a difficulty or custom goals from the key asset", async () => {
+    setKeyAssetMilestones("hard");
+    let res = await request(makeApp()).get("/api/game-state").query(CREDS);
+    expect(res.body.data.milestones).toEqual({ difficulty: "hard", config: { m1: 1000, m2: 3000, m3: 5000 } });
+
+    setKeyAssetMilestones({ m1: 10, m2: 20, m3: 30 });
+    res = await request(makeApp()).get("/api/game-state").query(CREDS);
+    expect(res.body.data.milestones).toEqual({ difficulty: "custom", config: { m1: 10, m2: 20, m3: 30 } });
+  });
+
+  test("GET /game-state falls back to Default for invalid custom goals", async () => {
+    setKeyAssetMilestones({ m1: 30, m2: 20, m3: 10 });
+    const res = await request(makeApp()).get("/api/game-state").query(CREDS);
+    expect(res.body.data.milestones.difficulty).toBe("default");
+  });
+
+  test("POST /admin/settings saves milestoneDifficulty on the key asset", async () => {
+    topiaMock.visitorIsAdmin = true;
+    seedWorldCount(100);
+    const res = await request(makeApp()).post("/api/admin/settings").query(CREDS).send({ milestoneDifficulty: "easy" });
+    expect(res.status).toBe(200);
+    expect(res.body.data.milestones).toEqual({ difficulty: "easy", config: { m1: 250, m2: 750, m3: 1250 } });
+    expect(topiaMock.lastDroppedAsset.dataObject.milestones).toBe("easy");
+  });
+
+  test("POST /admin/settings blocks a difficulty that would unlock a milestone without firing it", async () => {
+    topiaMock.visitorIsAdmin = true;
+    setKeyAssetMilestones("hard");
+    seedWorldCount(600); // Hard M1 (1,000) not reached; Default M1 (500) would be.
+    const res = await request(makeApp())
+      .post("/api/admin/settings")
+      .query(CREDS)
+      .send({ milestoneDifficulty: "default" });
+    expect(res.status).toBe(400);
+    expect(topiaMock.lastDroppedAsset.dataObject.milestones).toBe("hard");
+  });
+
+  test("POST /admin/settings allows a harder difficulty when milestones are already reached", async () => {
+    topiaMock.visitorIsAdmin = true;
+    seedWorldCount(3000); // all Default milestones reached; Hard keeps M1/M2 reached, M3 moves to 5,000.
+    const res = await request(makeApp()).post("/api/admin/settings").query(CREDS).send({ milestoneDifficulty: "hard" });
+    expect(res.status).toBe(200);
+    expect(topiaMock.lastDroppedAsset.dataObject.milestones).toBe("hard");
+  });
+
+  test("POST /admin/settings replaces custom goals with a difficulty", async () => {
+    topiaMock.visitorIsAdmin = true;
+    setKeyAssetMilestones({ m1: 10, m2: 20, m3: 30 });
+    seedWorldCount(5);
+    const res = await request(makeApp())
+      .post("/api/admin/settings")
+      .query(CREDS)
+      .send({ milestoneDifficulty: "default" });
+    expect(res.status).toBe(200);
+    expect(topiaMock.lastDroppedAsset.dataObject.milestones).toBe("default");
+  });
+
+  test("POST /admin/settings rejects an unknown milestoneDifficulty", async () => {
+    topiaMock.visitorIsAdmin = true;
+    const res = await request(makeApp())
+      .post("/api/admin/settings")
+      .query(CREDS)
+      .send({ milestoneDifficulty: "custom" });
+    expect(res.status).toBe(400);
+  });
+
+  test("POST /sightings/resolve crosses milestones using the key asset's goals", async () => {
+    const spotCreds = { ...CREDS, assetId: "asset-spot-feeder", uniqueName: "Birdwatch_spot" };
+    setKeyAssetMilestones("easy");
+    seedWorldCount(249); // Easy M1 = 250
+    seedCardinalInFlight();
+    const res = await request(makeApp())
+      .post("/api/sightings/resolve")
+      .query(spotCreds)
+      .send({ pickedBirdId: "northern_cardinal" });
+    expect(res.status).toBe(200);
+    expect(res.body.data.milestoneCrossed).toBe("m1");
+  });
+
   test("POST /admin/reset-leaderboard clears the leaderboard record", async () => {
     topiaMock.visitorIsAdmin = true;
     topiaMock.worldSeed = {
       adminSettings: { identificationMode: "description", cooldownSeconds: 60, allAboutBirdsLinksEnabled: true },
       collections: {},
       leaderboard: { p1: "You|5|1000" },
-      leaderboardSpecies: { p1: ["northern_cardinal"] },
     };
     const res = await request(makeApp()).post("/api/admin/reset-leaderboard").query(CREDS);
     expect(res.status).toBe(200);
     expect(res.body.data.leaderboard).toEqual({});
-    expect(topiaMock.lastWorld.dataObject.leaderboardSpecies).toEqual({});
   });
 
   test("POST /mystery/guess validates body and resolves correct answer", async () => {

@@ -1,6 +1,6 @@
 import type { Credentials } from "../../types/index.js";
 import type { DataObjectPatch, IWorld } from "../../types/DroppedAssetTypes.js";
-import type { WorldState, CollectionWorldState, CollectionWorldStateView } from "@shared/types/index.js";
+import type { WorldState, CollectionWorldState, CollectionWorldStateView, MilestoneConfig } from "@shared/types/index.js";
 import { DEFAULT_ADMIN_SETTINGS } from "@shared/types/index.js";
 import { World } from "../topiaInit.js";
 import { standardizeError } from "../standardizeError.js";
@@ -14,9 +14,9 @@ export const emptyCollectionState = (): CollectionWorldState => ({
 });
 
 /** Add the values derived from stored counts (milestones, most spotted). */
-export const toCollectionView = (state: CollectionWorldState): CollectionWorldStateView => ({
+export const toCollectionView = (state: CollectionWorldState, milestones: MilestoneConfig): CollectionWorldStateView => ({
   ...state,
-  milestones: milestoneStateFor(state.totalSightings || 0),
+  milestones: milestoneStateFor(state.totalSightings || 0, milestones),
   mostSpotted: computeMostSpotted(state.perBirdSightings || {}),
 });
 
@@ -24,7 +24,6 @@ export const emptyWorldState = (): WorldState => ({
   adminSettings: { ...DEFAULT_ADMIN_SETTINGS },
   collections: {},
   leaderboard: {},
-  leaderboardSpecies: {},
 });
 
 /**
@@ -46,9 +45,7 @@ export const getWorld = async (credentials: Credentials): Promise<IWorld> => {
       // Backfill newly-added top-level fields on existing worlds without blowing away data.
       const updates: DataObjectPatch = {};
       if (!current.collections) updates["collections"] = {};
-      if (!current.leaderboard) updates["leaderboard"] = {};
-      if (!current.leaderboardSpecies) updates["leaderboardSpecies"] = {};
-      if (!current.adminSettings) updates["adminSettings"] = { ...DEFAULT_ADMIN_SETTINGS };
+      if (!current.leaderboard) updates["leaderboard"] = {};      if (!current.adminSettings) updates["adminSettings"] = { ...DEFAULT_ADMIN_SETTINGS };
       if (Object.keys(updates).length) {
         await world.updateDataObject(updates, {}).catch(() => undefined);
         await world.fetchDataObject();

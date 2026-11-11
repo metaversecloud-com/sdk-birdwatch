@@ -60,7 +60,7 @@ describe("leaderboard", () => {
     const encoded = encodeEntry("maya_k", 14, 1_760_000_000_000);
     expect(encoded).toBe("maya_k|14|1760000000000");
     const decoded = decodeEntry("p1", encoded);
-    expect(decoded).toEqual({ profileId: "p1", displayName: "maya_k", speciesCount: 14, reachedAt: 1_760_000_000_000 });
+    expect(decoded).toEqual({ profileId: "p1", displayName: "maya_k", sightings: 14, reachedAt: 1_760_000_000_000 });
   });
 
   test("parseLeaderboard sorts by count desc then reachedAt asc", () => {

@@ -688,7 +688,7 @@ body {
   height: 8px;
   background: var(--bw-cloud);
   border-radius: 999px;
-  margin: 1.25rem 0.75rem 1.75rem;
+  margin: 1.15rem 0.75rem 1.35rem;
 }
 .bw-progress__fill {
   position: absolute;
@@ -913,4 +913,13 @@ body {
   .bw-modal {
     animation: none;
   }
+}
+.bw-settings-error {
+  margin: 0.6rem 0 0;
+  padding: 0.5rem 0.7rem;
+  border-radius: 8px;
+  background: var(--bw-danger-soft);
+  color: var(--bw-danger);
+  font-size: 0.85rem;
+  font-weight: 600;
 }

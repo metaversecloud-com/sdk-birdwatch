@@ -27,9 +27,9 @@ Key architectural points — flag these before touching them:
 - **Scene siblings are linked by `sceneDropId`**, not a stored `linkedKeyAssetId`.
 - **World state lives on the World data object** (flat, no app wrapper), not on the key asset, so Bird Counts survive scene remove-and-replace.
 - **Visitor data is keyed by `${urlSlug}-${sceneDropId}`** at the top level of the visitor data object (no app wrapper). One player can play many Birdwatch instances across many worlds without collisions. Only state inventory can't hold lives here (cooldowns, in-flight sightings, Legendary Alert usage, Mystery Bird state, `pendingBadgeToasts`).
-- **Leaderboard entries are pipe-concat strings** (`"displayName|speciesCount|reachedAt"`) keyed by profileId. Keep the record small.
+- **Leaderboard entries are pipe-concat strings** (`"displayName|sightings|reachedAt"`) keyed by profileId. Keep the record small. `sightings` is the player's `perPlayerContribution` summed across the world's Collections, so it matches "You've added" on the World Bird Count tab.
 - **No SSE / real-time layer.** Birdwatch is not turn-based. World-wide events use `WorldActivityFactory.fireToast`; the next drawer open re-pulls `/game-state`.
-- **Inventory is the source of truth for anything it can answer.** Every correct ID adds +1 of the bird's species item (`modifyInventoryItemQuantity`), so quantity = times spotted and the sum = lifetime correct IDs. New-species checks and species/correct-ID badges read inventory, never the data object. Exception: the leaderboard ranks species found in *this world*, which inventory can't answer, so it reads `world.leaderboardSpecies[profileId]`.
+- **Inventory is the source of truth for anything it can answer.** Every correct ID adds +1 of the bird's species item (`modifyInventoryItemQuantity`), so quantity = times spotted and the sum = lifetime correct IDs. New-species checks and species/correct-ID badges read inventory, never the data object.
 - **Legendary Alert is world-wide**: fires a platform toast via `WorldActivity.fireToast`, grants every player a one-time guaranteed Legendary roll on their next click on the matching spot type within 5 minutes.
 
 Full product spec and plan: [`.ai/templates/plan.md`](.ai/templates/plan.md).

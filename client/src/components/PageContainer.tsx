@@ -31,7 +31,7 @@ export const PageContainer = ({
         <AdminIconButton setShowSettings={() => setShowSettings(!showSettings)} showSettings={showSettings} />
       )}
       {headerText && (
-        <div className="pb-6">
+        <div className="pb-3">
           <h2>{headerText}</h2>
         </div>
       )}

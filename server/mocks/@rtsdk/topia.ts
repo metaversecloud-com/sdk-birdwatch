@@ -57,13 +57,15 @@ export class DroppedAssetFactory {
   constructor(_topia: any) {}
   async get(assetId: string, urlSlug: string, _opts: any) {
     const holder = makeDataHolder((__mock as any).droppedAssetSeed[assetId] || {});
-    return {
+    const asset = {
       id: assetId,
       urlSlug,
       uniqueName: (__mock as any).droppedAssetUniqueName[assetId],
       position: { x: 0, y: 0 },
       ...holder,
     };
+    (__mock as any).lastDroppedAsset = asset;
+    return asset;
   }
 }
 
@@ -125,7 +127,12 @@ export class WorldFactory {
       triggerParticle: jest.fn().mockResolvedValue(undefined),
       fireToast,
     };
-    (__mock as any).lastWorld = world;
+    // `lastWorld` is the last world written to (a request can create several, e.g. scene lookups).
+    const write = holder.updateDataObject;
+    world.updateDataObject = jest.fn(async function (this: any, ...args: any[]) {
+      (__mock as any).lastWorld = this;
+      return write.apply(this, args);
+    });
     return world;
   }
 }

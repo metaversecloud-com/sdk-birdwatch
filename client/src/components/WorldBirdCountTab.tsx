@@ -67,15 +67,16 @@ export const WorldBirdCountTab = ({ onOpenFieldGuide }: { onOpenFieldGuide: () =
   const total = ws?.totalSightings || 0;
   const found = Object.keys(visitorBirdItems || {}).length;
 
+  const goals = gameState?.milestones?.config || DEFAULT_MILESTONES;
   const milestones = [
-    { total: DEFAULT_MILESTONES.m1, reached: ws?.milestones?.rareBoostUnlocked, label: "Rare birds visit more often" },
+    { total: goals.m1, reached: ws?.milestones?.rareBoostUnlocked, label: "Rare birds visit more often" },
     {
-      total: DEFAULT_MILESTONES.m2,
+      total: goals.m2,
       reached: ws?.milestones?.legendaryBoostUnlocked,
       label: "Legendary bird visits more often",
     },
     {
-      total: DEFAULT_MILESTONES.m3,
+      total: goals.m3,
       reached: ws?.milestones?.championBadgeUnlocked,
       label: "Champion Birder badge for all",
     },
@@ -128,7 +129,7 @@ export const WorldBirdCountTab = ({ onOpenFieldGuide }: { onOpenFieldGuide: () =
       <div className="bw-card">
         <strong>Milestones</strong>
         <MilestonesProgress total={total} milestones={milestones} />
-        <div className="flex flex-col gap-2 mt-2">
+        <div className="flex flex-col gap-2">
           {nextMilestone && (
             <span>
               <strong>{toGo.toLocaleString()} to go:</strong> {nextMilestone.label}
@@ -136,10 +137,10 @@ export const WorldBirdCountTab = ({ onOpenFieldGuide }: { onOpenFieldGuide: () =
           )}
           {milestones.map((m) => (
             <div key={m.total} className={`grid gap-2 bw-milestone${m.reached ? " bw-milestone--reached" : ""}`}>
-              <strong className="min-w-[45px]">{m.total.toLocaleString()}</strong>
-              <div>
+              <strong className="min-w-[40px]">{m.total.toLocaleString()}</strong>
+              <div className="text-sm">
                 {m.label}
-                <div className="bw-caption ml-auto">
+                <div className="text-xs">
                   {m.reached ? "Reached" : `${Math.max(0, m.total - total).toLocaleString()} to go`}
                 </div>
               </div>
