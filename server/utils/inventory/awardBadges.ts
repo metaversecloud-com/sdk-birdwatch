@@ -56,8 +56,17 @@ export const awardBadges = async (
     });
     if (!granted.length) return { granted };
 
+    // `badgeEarns` rides on the one recipient write below (one entry per granted badge).
+    const analytics = granted.map((badgeName) => ({
+      analyticName: "badgeEarns",
+      profileId: recipientProfileId,
+      uniqueKey: `${recipientProfileId}:${badgeName}`,
+      urlSlug: credentials.urlSlug,
+    }));
+
     if (toastVisitor) {
       for (const badgeName of granted) fireBadgeToast(toastVisitor, badgeName);
+      await user.updateDataObject({}, { analytics });
       return { granted };
     }
 
@@ -66,7 +75,7 @@ export const awardBadges = async (
     const queued = ((user.dataObject as { pendingBadgeToasts?: string[] })?.pendingBadgeToasts || []).filter(
       (n) => !granted.includes(n),
     );
-    await user.updateDataObject({ pendingBadgeToasts: [...queued, ...granted] }, {});
+    await user.updateDataObject({ pendingBadgeToasts: [...queued, ...granted] }, { analytics });
 
     return { granted };
   } catch (error) {

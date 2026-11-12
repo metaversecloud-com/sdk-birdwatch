@@ -36,7 +36,7 @@ Three unique names — the **same across every Collection** and every spot type.
 
 | Method | Path                           | Body                             | Response                                                                                                                                                                              |
 | ------ | ------------------------------ | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/game-state`              | —                                | `{ success, data: GameStateResponse, visitorInventory, visitorBirdItems, profileId, displayName }`                                                                                    |
+| `GET`  | `/api/game-state`              | `?refresh=true` for in-app refreshes (skips `appOpens`) | `{ success, data: GameStateResponse, visitorInventory, visitorBirdItems, profileId, displayName }`                                                                                    |
 | `POST` | `/api/sightings/start`         | —                                | `{ success, reused, data: { spot, sighting: VisitorInFlightSighting \| null } }` (`null` while the spot is resting)                                                                          |
 | `POST` | `/api/sightings/resolve`       | `{ pickedBirdId }`               | `{ success, data: { outcome: "new_species" \| "repeat" \| "wrong", rightBird, pickedBird, timesSpotted?, grantedBadges, milestoneCrossed?, newTotalSightings?, yourSpeciesCount? } }` |
 | `GET`  | `/api/cooldown`                | —                                | `{ success, data: { remainingSeconds, spotsToTry: SpotStatus[], activeLegendaryAlert? } }`                                                                                            |
@@ -44,6 +44,7 @@ Three unique names — the **same across every Collection** and every spot type.
 | `POST` | `/api/admin/reset-bird-count`  | —                                | `{ success, data: { reset: n } }` (admin only)                                                                                                                                        |
 | `POST` | `/api/admin/reset-leaderboard` | —                                | `{ success, data: { leaderboard: {} } }` (admin only)                                                                                                                                 |
 | `POST` | `/api/mystery/guess`           | `{ collectionId, pickedBirdId }` | `{ success, data: { outcome: "solved" \| "wrong" \| "out", mysteryBird: MysteryBirdView } }` (answer withheld until done) |
+| `POST` | `/api/analytics`               | `{ analyticName }`               | `{ success }`. UI-only analytics: `fieldGuideOpens`, `fieldGuidePageViews`, `externalLinkClicks` (allowlisted in `CLIENT_ANALYTICS`) |
 
 All endpoints accept the standard Topia iframe credentials via query params; `forceRefreshInventory=true` busts the ecosystem-inventory cache for that request.
 

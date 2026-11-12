@@ -1,6 +1,10 @@
 import type { SpotKey } from "./BirdTypes.js";
 import type { MysteryBirdView } from "./MysteryBirdTypes.js";
 
+/** Analytics the client reports through POST /api/analytics (everything else is logged server-side). */
+export const CLIENT_ANALYTICS = ["fieldGuideOpens", "fieldGuidePageViews", "externalLinkClicks"] as const;
+export type ClientAnalyticName = (typeof CLIENT_ANALYTICS)[number];
+
 export type IdentificationMode = "description" | "picture_match";
 
 export const COOLDOWN_OPTIONS = [60, 120, 300, 3600] as const;

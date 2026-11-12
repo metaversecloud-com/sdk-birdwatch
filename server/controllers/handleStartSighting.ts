@@ -70,6 +70,9 @@ export const handleStartSighting = async (req: Request, res: Response) => {
     // Spot is resting and its sighting was already resolved: don't re-roll. The client shows
     // the cooldown screen. A fresh Legendary Alert for this spot type still gets through.
     if (inCooldown(cd, now) && !isLegendarySkip) {
+      await visitor
+        .updateDataObject({}, { analytics: [{ analyticName: "spotClicks-cooldown", uniqueKey: profileId, urlSlug }] })
+        .catch(() => undefined);
       return res.json({ success: true, data: { spot: spotMeta.spot, sighting: null } });
     }
 

@@ -8,6 +8,7 @@ import {
   handleResetBirdCount,
   handleResetLeaderboard,
   handleMysteryGuess,
+  handleTrackEvent,
 } from "./controllers/index.js";
 import { getVersion } from "@utils/getVersion.js";
 
@@ -41,5 +42,6 @@ router.post("/admin/settings", handleUpdateAdminSettings);
 router.post("/admin/reset-bird-count", handleResetBirdCount);
 router.post("/admin/reset-leaderboard", handleResetLeaderboard);
 router.post("/mystery/guess", handleMysteryGuess);
+router.post("/analytics", handleTrackEvent);
 
 export default router;

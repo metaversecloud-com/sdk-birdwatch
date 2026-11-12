@@ -11,7 +11,7 @@ import { GlobalDispatchContext, GlobalStateContext } from "@/context/GlobalConte
 import { ErrorType, ResultDataType } from "@/context/types";
 
 // utils
-import { backendAPI, setErrorMessage } from "@/utils";
+import { backendAPI, setErrorMessage, trackEvent } from "@/utils";
 
 import { SPOT_LABELS } from "@shared/types";
 import type { Bird, SpotKey, VisitorInFlightSighting } from "@shared/types";
@@ -24,6 +24,7 @@ export const SpotDrawer = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const openFieldGuide = () => {
+    trackEvent("fieldGuideOpens");
     const next = new URLSearchParams(searchParams);
     next.set("tab", "fg");
     navigate({ pathname: "/", search: next.toString() });
@@ -91,7 +92,10 @@ export const SpotDrawer = () => {
           onDone={() => setPhase("idle")}
           onCooldownReady={startSighting}
           onOpenFieldGuide={openFieldGuide}
-          onSeeFieldGuidePage={() => setOpenBird(result.rightBird)}
+          onSeeFieldGuidePage={() => {
+            trackEvent("fieldGuidePageViews");
+            setOpenBird(result.rightBird);
+          }}
         />
       )}
       {phase === "idle" && !loading && <CooldownScreen onOpenFieldGuide={openFieldGuide} onReady={startSighting} />}

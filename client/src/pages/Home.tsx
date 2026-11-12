@@ -10,7 +10,7 @@ import { GlobalDispatchContext, GlobalStateContext } from "@/context/GlobalConte
 import { ErrorType } from "@/context/types";
 
 // utils
-import { backendAPI, setGameState, setErrorMessage } from "@/utils";
+import { backendAPI, setGameState, setErrorMessage, trackEvent } from "@/utils";
 
 import type { Bird } from "@shared/types";
 
@@ -32,9 +32,18 @@ export const Home = () => {
   const [panel, setPanel] = useState<Panel>("tabs");
   const [openBird, setOpenBird] = useState<Bird | null>(null);
 
+  const openFieldGuide = () => {
+    if (tab !== "fg") trackEvent("fieldGuideOpens");
+    setTab("fg");
+  };
+  const openBirdPage = (bird: Bird) => {
+    trackEvent("fieldGuidePageViews");
+    setOpenBird(bird);
+  };
+
   const refresh = async () => {
     try {
-      const r = await backendAPI.get("/game-state");
+      const r = await backendAPI.get("/game-state", { params: { refresh: true } });
       setGameState(dispatch, r.data);
     } catch (e) {
       setErrorMessage(dispatch, e as ErrorType);
@@ -63,7 +72,7 @@ export const Home = () => {
         <button className={`bw-tab${tab === "wbc" ? " bw-tab--active" : ""}`} onClick={() => setTab("wbc")}>
           World Bird Count
         </button>
-        <button className={`bw-tab${tab === "fg" ? " bw-tab--active" : ""}`} onClick={() => setTab("fg")}>
+        <button className={`bw-tab${tab === "fg" ? " bw-tab--active" : ""}`} onClick={openFieldGuide}>
           Field Guide
         </button>
         {mystery && (
@@ -73,8 +82,8 @@ export const Home = () => {
         )}
       </div>
       {tab !== "mb" && mysteryCta}
-      {tab === "wbc" && <WorldBirdCountTab onOpenFieldGuide={() => setTab("fg")} />}
-      {tab === "fg" && <FieldGuideTab onOpenBird={(bird) => setOpenBird(bird)} />}
+      {tab === "wbc" && <WorldBirdCountTab onOpenFieldGuide={openFieldGuide} />}
+      {tab === "fg" && <FieldGuideTab onOpenBird={openBirdPage} />}
       {tab === "mb" && <MysteryBirdTab />}
       {openBird && <BirdPage bird={openBird} onClose={() => setOpenBird(null)} />}
     </PageContainer>

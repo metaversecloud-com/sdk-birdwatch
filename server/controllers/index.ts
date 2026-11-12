@@ -6,3 +6,4 @@ export * from "./handleUpdateAdminSettings.js";
 export * from "./handleResetBirdCount.js";
 export * from "./handleResetLeaderboard.js";
 export * from "./handleMysteryGuess.js";
+export * from "./handleTrackEvent.js";

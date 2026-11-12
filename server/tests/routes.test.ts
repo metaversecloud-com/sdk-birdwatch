@@ -49,6 +49,28 @@ describe("Birdwatch routes", () => {
     seedKeyAsset();
   });
 
+  const analyticNames = () => topiaMock.analyticsLog.map((a: any) => a.analyticName);
+
+  test("GET /game-state logs appOpens, but not for in-app refreshes", async () => {
+    await request(makeApp()).get("/api/game-state").query(CREDS);
+    expect(analyticNames()).toContain("appOpens");
+
+    topiaMock.analyticsLog = [];
+    await request(makeApp()).get("/api/game-state").query({ ...CREDS, refresh: "true" });
+    expect(analyticNames()).not.toContain("appOpens");
+  });
+
+  test("POST /analytics logs client analytics and rejects unknown names", async () => {
+    for (const name of ["fieldGuideOpens", "fieldGuidePageViews", "externalLinkClicks"]) {
+      const res = await request(makeApp()).post("/api/analytics").query(CREDS).send({ analyticName: name });
+      expect(res.status).toBe(200);
+    }
+    expect(analyticNames()).toEqual(["fieldGuideOpens", "fieldGuidePageViews", "externalLinkClicks"]);
+
+    const bad = await request(makeApp()).post("/api/analytics").query(CREDS).send({ analyticName: "birdIDs-correct" });
+    expect(bad.status).toBe(400);
+  });
+
   test("GET /system/health returns OK", async () => {
     const res = await request(makeApp()).get("/api/system/health");
     expect(res.status).toBe(200);
@@ -89,6 +111,8 @@ describe("Birdwatch routes", () => {
     const res = await request(makeApp()).post("/api/sightings/start").query(spotCreds);
     expect(res.status).toBe(200);
     expect(res.body.data.sighting).toBeNull();
+    expect(analyticNames()).toContain("spotClicks-cooldown");
+    expect(analyticNames()).not.toContain("spotClicks");
   });
 
   test("POST /sightings/resolve wrong pick returns outcome='wrong' and doesn't update world count", async () => {
@@ -386,6 +410,9 @@ describe("Birdwatch routes", () => {
     await new Promise((r) => setTimeout(r, 10));
     expect(topiaMock.fireToast).toHaveBeenCalledWith(
       expect.objectContaining({ title: "Badge Awarded", text: "You have earned the Mystery Solved badge!" }),
+    );
+    expect(topiaMock.analyticsLog).toContainEqual(
+      expect.objectContaining({ analyticName: "badgeEarns", profileId: "p1", uniqueKey: "p1:Mystery Solved" }),
     );
   });
 

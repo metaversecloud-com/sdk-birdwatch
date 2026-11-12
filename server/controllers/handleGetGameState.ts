@@ -100,10 +100,16 @@ export const handleGetGameState = async (req: Request, res: Response) => {
 
     // Toast badges granted since the last open (queued by `awardBadges`), then clear the
     // queue. Fire-and-forget: a failed toast must not block the queue clear or the response.
+    // The same write logs `appOpens`, except for in-app refreshes (`?refresh=true`).
     const pendingBadgeToasts = visitor.dataObject?.pendingBadgeToasts || [];
-    if (pendingBadgeToasts.length) {
-      for (const badgeName of pendingBadgeToasts) fireBadgeToast(visitor, badgeName);
-      await visitor.updateDataObject({ pendingBadgeToasts: [] }, {}).catch(() => undefined);
+    for (const badgeName of pendingBadgeToasts) fireBadgeToast(visitor, badgeName);
+    const isAppOpen = req.query.refresh !== "true";
+    if (pendingBadgeToasts.length || isAppOpen) {
+      await visitor
+        .updateDataObject(pendingBadgeToasts.length ? { pendingBadgeToasts: [] } : {}, {
+          analytics: isAppOpen ? [{ analyticName: "appOpens", uniqueKey: profileId, urlSlug: credentials.urlSlug }] : [],
+        })
+        .catch(() => undefined);
     }
 
     // Today's Mystery Bird (read-only: the day's puzzle is picked deterministically, saved on first guess).

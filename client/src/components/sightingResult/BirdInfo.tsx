@@ -1,5 +1,6 @@
 import type { Bird } from "@shared/types";
 import { SPOT_LABELS } from "@shared/types";
+import { trackEvent } from "@/utils";
 
 import { BirdFact } from "./BirdFact";
 import { BirdInfoSection } from "./BirdInfoSection";
@@ -37,7 +38,13 @@ export const BirdInfo = ({ bird, found, linksOn, showFacts = true, showCall = fa
           {!showCall && <BirdInfoSection label="Call" value={bird.call} />}
           <BirdInfoSection label="Fun fact" value={bird.funFact} />
           {linksOn && (
-            <a className="bw-btn-outline text-sm" href={bird.allAboutBirdsUrl} target="_blank" rel="noreferrer">
+            <a
+              className="bw-btn-outline text-sm"
+              href={bird.allAboutBirdsUrl}
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => trackEvent("externalLinkClicks")}
+            >
               Learn more at All About Birds ↗
             </a>
           )}

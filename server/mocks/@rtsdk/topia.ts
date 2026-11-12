@@ -14,7 +14,9 @@ const makeDataHolder = (initial: Record<string, any> = {}) => {
       this.dataObject = { ...next };
       return this.dataObject;
     }),
-    updateDataObject: jest.fn(async function (this: any, patch: any, _opts?: Lock & Analytics) {
+    updateDataObject: jest.fn(async function (this: any, patch: any, opts?: Lock & Analytics) {
+      // Every analytic sent through any data object write, in order.
+      (__mock as any).analyticsLog.push(...(opts?.analytics || []));
       this.dataObject = applyDotPatch(this.dataObject, patch);
       return this.dataObject;
     }),
@@ -157,7 +159,9 @@ export const __mock = {
   visitorInventoryItems: [] as any[],
   ecosystemItems: [] as any[],
   sceneAssets: [] as any[],
+  analyticsLog: [] as Array<Record<string, unknown>>,
   reset(this: any) {
+    this.analyticsLog = [];
     fireToast.mockClear();
     modifyInventoryItemQuantity.mockClear();
     this.lastWorldCreateArgs = null;

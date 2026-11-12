@@ -20,7 +20,7 @@ export const TrophyDrawer = () => {
 
   const refresh = async () => {
     try {
-      const r = await backendAPI.get("/game-state");
+      const r = await backendAPI.get("/game-state", { params: { refresh: true } });
       setGameState(dispatch, r.data);
     } catch (e) {
       setErrorMessage(dispatch, e as ErrorType);
