@@ -1,5 +1,5 @@
 // Permission checks and anti-cheat: what a player can do by calling the API directly.
-import { COLLECTION_ID, OtherVisitor, PUZZLE_1, SpotKey, etDayKey, expect, placedWorld, sighting, spotAssetId, test } from "../../fixtures";
+import { COLLECTION_ID, PUZZLE_1, SpotKey, etDayKey, expect, placedWorld, sighting, spotAssetId, test } from "../../fixtures";
 
 const CHICKADEE = ["black_capped_chickadee", "northern_cardinal", "blue_jay"];
 
@@ -128,12 +128,12 @@ test.describe("concurrent answers", () => {
 
   test("players answering at the same time all count toward the World Bird Count", async ({ page, world }) => {
     test.fail(true, "EXP-436: resolve writes totals computed from a stale read, so simultaneous sightings overwrite each other");
-    const players: OtherVisitor[] = Array.from({ length: 8 }, (_, i) => ({ visitorId: 100 + i, profileId: `${world.profileId}-p${i}`, displayName: `Player ${i}` }));
+    const players = Array.from({ length: 8 }, (_, i) => ({ visitorId: 100 + i, profileId: `${world.profileId}-p${i}`, displayName: `Player ${i}` }));
     const pending = { [world.sceneKey]: sighting("feeder", "black_capped_chickadee", ["black_capped_chickadee", "mallard", "blue_jay"]) };
-    await world.seed({ otherVisitors: players.map((p) => ({ ...p, visitorData: pending })) });
+    await world.seed({ otherVisitors: Object.fromEntries(players.map((p) => [p.visitorId, { ...p, visitorData: pending }])) });
 
     await Promise.all(
-      players.map((p) => page.request.post(world.api("/sightings/resolve", world.as(p, "feeder")), { data: { pickedBirdId: "black_capped_chickadee" } })),
+      players.map((p) => page.request.post(world.api("/sightings/resolve", { ...world.at("feeder"), ...world.as(p.visitorId) }), { data: { pickedBirdId: "black_capped_chickadee" } })),
     );
 
     const collection = await world.collection();

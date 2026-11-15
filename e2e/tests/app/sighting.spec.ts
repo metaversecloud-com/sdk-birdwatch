@@ -127,7 +127,7 @@ test.describe("answering", () => {
     await expect.poll(async () => (await world.inventory()).birds).toEqual({ black_capped_chickadee: 3 });
     expect((await world.collection()).totalSightings).toBe(1);
     // Owned badges aren't granted again.
-    expect(await world.events("grant-item")).toEqual([]);
+    expect(await world.events("grant-user-item")).toEqual([]);
     expect((await world.events("analytics")).map((a) => a.analyticName)).not.toContain("speciesLogs");
   });
 

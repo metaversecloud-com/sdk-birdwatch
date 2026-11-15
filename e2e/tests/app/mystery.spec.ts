@@ -1,6 +1,6 @@
 // Mystery Bird: a daily puzzle with three clues, four candidates and two guesses.
 import { Page } from "@playwright/test";
-import { BIRDS, COLLECTION_ID, PUZZLES, PUZZLE_1, TopiaWorld, etDayKey, expect, test } from "../../fixtures";
+import { BIRDS, COLLECTION_ID, PUZZLES, PUZZLE_1, BirdwatchWorld, etDayKey, expect, test } from "../../fixtures";
 
 /** Today's puzzle is NAWB-001 (answer: Black-capped Chickadee) with the given guesses already made. */
 const today = (guessedIds: string[] = [], totals = { solvedTotal: 0, firstTryTotal: 0 }) => ({
@@ -11,15 +11,15 @@ const today = (guessedIds: string[] = [], totals = { solvedTotal: 0, firstTryTot
   ...totals,
 });
 
-const mysteryData = (world: TopiaWorld, state = today()) => ({ [world.sceneKey]: { spotCooldowns: {}, mysteryBird: { [COLLECTION_ID]: state } } });
+const mysteryData = (world: BirdwatchWorld, state = today()) => ({ [world.sceneKey]: { spotCooldowns: {}, mysteryBird: { [COLLECTION_ID]: state } } });
 
-const guess = (page: Page, world: TopiaWorld, pickedBirdId: string, overrides: Record<string, string> = {}) =>
+const guess = (page: Page, world: BirdwatchWorld, pickedBirdId: string, overrides: Record<string, string> = {}) =>
   page.request.post(world.api("/mystery/guess", overrides), { data: { collectionId: COLLECTION_ID, pickedBirdId } });
 
 const [WRONG_1, WRONG_2] = PUZZLE_1.decoyIds;
 
 /** Open the key asset on a player's first Mystery Bird day and return today's puzzle. */
-const openMysteryTab = async (page: Page, world: TopiaWorld) => {
+const openMysteryTab = async (page: Page, world: BirdwatchWorld) => {
   const gameState = page.waitForResponse((r) => r.url().includes("/api/game-state")).then((r) => r.json());
   await world.open(page, "key");
   await page.getByRole("button", { name: "Mystery Bird", exact: true }).click();
@@ -116,7 +116,7 @@ test("solving on the second guess doesn't count as First Try", async ({ page, wo
   expect((await world.sceneData()).mysteryBird[COLLECTION_ID]).toMatchObject({ solvedTotal: 2, firstTryTotal: 0 });
   // Mystery Solved is owned and First Try wasn't earned: nothing to grant.
   await page.waitForTimeout(300);
-  expect(await world.events("grant-item")).toEqual([]);
+  expect(await world.events("grant-user-item")).toEqual([]);
 });
 
 test.describe("guesses the server rejects", () => {

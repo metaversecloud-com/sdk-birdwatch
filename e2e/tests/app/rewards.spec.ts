@@ -2,8 +2,7 @@
 import { Page } from "@playwright/test";
 import {
   COLLECTION_ID,
-  OtherVisitor,
-  TopiaWorld,
+  BirdwatchWorld,
   VISITOR_ID,
   birdsAt,
   expect,
@@ -13,15 +12,15 @@ import {
   test,
 } from "../../fixtures";
 
-const resolve = async (page: Page, world: TopiaWorld, spot: Parameters<TopiaWorld["at"]>[0], pickedBirdId: string) => {
+const resolve = async (page: Page, world: BirdwatchWorld, spot: Parameters<BirdwatchWorld["at"]>[0], pickedBirdId: string) => {
   const response = await page.request.post(world.api("/sightings/resolve", world.at(spot)), { data: { pickedBirdId } });
   expect(response.ok()).toBe(true);
   return (await response.json()).data;
 };
 
-const otherBirder = (world: TopiaWorld): OtherVisitor => ({ visitorId: 77, profileId: `${world.profileId}-other`, displayName: "Other Birder" });
+const otherBirder = (world: BirdwatchWorld) => ({ visitorId: 77, profileId: world.scopedId("other"), displayName: "Other Birder" });
 
-const toasts = async (world: TopiaWorld, visitorId: number = VISITOR_ID) =>
+const toasts = async (world: BirdwatchWorld, visitorId: number = VISITOR_ID) =>
   (await world.events("fire-toast")).filter((t) => t.visitorId === String(visitorId)).map((t) => t.title);
 
 test.describe("badges", () => {
@@ -36,7 +35,7 @@ test.describe("badges", () => {
     await resolve(page, world, "feeder", last);
 
     await expect.poll(async () => (await world.inventory()).badges).toContain("Winter Feeder Birds");
-    expect(await world.events("grant-item")).toEqual([expect.objectContaining({ name: "Winter Feeder Birds", profileId: world.profileId })]);
+    expect(await world.events("grant-user-item")).toEqual([expect.objectContaining({ name: "Winter Feeder Birds", profileId: world.profileId })]);
   });
 
   test("the 10th species earns Avid Birder and the 20th correct ID earns Bird Spotter", async ({ page, world }) => {
@@ -126,7 +125,7 @@ test.describe("World Bird Count milestones", () => {
     await world.seed({
       keyAssetData,
       badges: ["First Sighting"],
-      otherVisitors: [other],
+      otherVisitors: { [other.visitorId]: other },
       worldData: placedWorld({ collection: { totalSightings: 6, perPlayerContribution: { [world.profileId]: 3, [other.profileId]: 3 } } }),
       visitorData: { [world.sceneKey]: sighting("feeder", "black_capped_chickadee", ["black_capped_chickadee", "blue_jay", "mallard"]) },
     });
@@ -143,12 +142,11 @@ test.describe("World Bird Count milestones", () => {
   });
 
   test("other participants get their Champion Birder toast the next time they open Birdwatch", async ({ page, world }) => {
-    test.fail(true, "EXP-436: queued badge toasts are written to the user data object but read from the visitor's");
     const other = otherBirder(world);
     await world.seed({
       keyAssetData,
       badges: ["First Sighting"],
-      otherVisitors: [other],
+      otherVisitors: { [other.visitorId]: other },
       worldData: placedWorld({ collection: { totalSightings: 6, perPlayerContribution: { [world.profileId]: 3, [other.profileId]: 3 } } }),
       visitorData: { [world.sceneKey]: sighting("feeder", "black_capped_chickadee", ["black_capped_chickadee", "blue_jay", "mallard"]) },
     });
@@ -157,7 +155,7 @@ test.describe("World Bird Count milestones", () => {
     await expect.poll(async () => (await world.userData(other.profileId))?.pendingBadgeToasts).toBeTruthy();
 
     // The other participant opens the key asset.
-    const response = await page.request.get(world.api("/game-state", world.as(other)));
+    const response = await page.request.get(world.api("/game-state", { ...world.at("key"), ...world.as(other.visitorId) }));
     expect(response.ok()).toBe(true);
 
     expect(await world.events("fire-toast")).toContainEqual(
@@ -172,7 +170,7 @@ test.describe("Legendary Alert", () => {
     const other = otherBirder(world);
     await world.seed({
       badges: ["First Sighting"],
-      otherVisitors: [other],
+      otherVisitors: { [other.visitorId]: other },
       worldData: placedWorld({ adminSettings: { cooldownSeconds: 300 } }),
       visitorData: { [world.sceneKey]: sighting("frozen_pond", "snowy_owl", ["snowy_owl", "mallard", "blue_jay"]) },
     });
