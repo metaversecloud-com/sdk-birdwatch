@@ -2,14 +2,14 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { Route, Routes, useNavigate, useSearchParams } from "react-router-dom";
 
 // pages
-import { Error, Home } from "./pages";
+import { Error, Home, SpotDrawer, TrophyDrawer } from "./pages";
 
 // context
 import { GlobalDispatchContext } from "./context/GlobalContext";
-import { InteractiveParams, SET_HAS_INTERACTIVE_PARAMS } from "./context/types";
+import { ErrorType, InteractiveParams, SET_HAS_INTERACTIVE_PARAMS } from "./context/types";
 
 // utils
-import { setupBackendAPI } from "./utils/backendAPI";
+import { backendAPI, setGameState, setErrorMessage, setupBackendAPI } from "./utils";
 
 const App = () => {
   const navigate = useNavigate();
@@ -49,6 +49,19 @@ const App = () => {
     if (!hasInitBackendAPI) setupBackend();
   }, [hasInitBackendAPI, interactiveParams]);
 
+  // Bootstrap /game-state once the backend API is ready. Replaces per-page fetches so every
+  // route (/, /spot, /trophy) sees the same initial GlobalState.
+  useEffect(() => {
+    if (!hasInitBackendAPI) return;
+    const forceRefreshInventory = searchParams.get("forceRefreshInventory") === "true";
+    const collectionId = searchParams.get("collectionId") || undefined;
+    const spot = searchParams.get("spot") || undefined;
+    backendAPI
+      .get("/game-state", { params: { forceRefreshInventory, collectionId, spot } })
+      .then((response) => setGameState(dispatch, response.data))
+      .catch((error) => setErrorMessage(dispatch, error as ErrorType));
+  }, [hasInitBackendAPI, dispatch, searchParams]);
+
   const setupBackend = () => {
     setupBackendAPI(interactiveParams)
       .catch((error) => {
@@ -84,6 +97,8 @@ const App = () => {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/spot" element={<SpotDrawer />} />
+      <Route path="/trophy" element={<TrophyDrawer />} />
       <Route path="*" element={<Error />} />
     </Routes>
   );

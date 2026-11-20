@@ -1,5 +1,7 @@
-export const initialState = {
+import type { InitialState } from "./types";
+
+export const initialState: InitialState = {
   error: "",
-  gameState: {},
   hasInteractiveParams: false,
+  isAdmin: false,
 };
