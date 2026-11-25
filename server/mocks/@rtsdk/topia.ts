@@ -101,6 +101,18 @@ export class VisitorFactory {
   }
   private makeVisitor(visitorId: number, urlSlug: string, _opts: any, withDetails: boolean) {
     const holder = makeDataHolder((__mock as any).visitorSeed || {});
+    // Like the real SDK: the write persists (merged), but the local `dataObject` becomes the
+    // partial payload that was sent. Re-fetching returns the merged record.
+    let stored = holder.dataObject;
+    holder.fetchDataObject = jest.fn(async function (this: any) {
+      this.dataObject = stored;
+      return stored;
+    });
+    holder.updateDataObject = jest.fn(async function (this: any, patch: any, opts?: Lock & Analytics) {
+      (__mock as any).analyticsLog.push(...(opts?.analytics || []));
+      stored = applyDotPatch(stored, patch);
+      this.dataObject = patch;
+    });
     return {
       ...holder,
       id: visitorId,

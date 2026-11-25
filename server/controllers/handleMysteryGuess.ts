@@ -75,6 +75,10 @@ export const handleMysteryGuess = async (req: Request, res: Response) => {
       firstTryTotal: isCorrect && guessedIds.length === 0 ? state.firstTryTotal + 1 : state.firstTryTotal,
     };
 
+    // Mystery badges count across every scene and Collection. Summed before the write: the
+    // SDK's updateDataObject replaces `visitor.dataObject` with the partial payload it sent.
+    const totals = sumMysteryTotals(visitor.dataObject, { sceneKey: key, collectionId, state: nextState });
+
     await visitor.updateDataObject(
       { [`${key}.mysteryBird.${collectionId}`]: nextState },
       {
@@ -83,9 +87,6 @@ export const handleMysteryGuess = async (req: Request, res: Response) => {
           : [],
       },
     );
-
-    // Mystery badges count across every scene and Collection.
-    const totals = sumMysteryTotals(visitor.dataObject, { sceneKey: key, collectionId, state: nextState });
 
     // Badges on solve. Fire-and-forget so the guess response isn't blocked; each badge's
     // toast fires as soon as its grant succeeds.

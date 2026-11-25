@@ -426,6 +426,58 @@ describe("Birdwatch routes", () => {
     expect(mb.answerId).toBeUndefined();
   });
 
+  test("GET /game-state shows today's Mystery Bird as done after it was solved", async () => {
+    const { collection } = require("../data/collections/northAmericanWinterBirds");
+    const puzzle = require("../data/collections/mysteryBirdPuzzles/northAmericanWinterBirds").puzzles[0];
+    topiaMock.visitorSeed = {
+      "world-scene-1": {
+        spotCooldowns: {},
+        mysteryBird: {
+          [collection.id]: {
+            todayKey: require("../utils/mysteryBird/pickTodayPuzzle").etDayKey(),
+            puzzleId: puzzle.id,
+            guessedIds: [puzzle.answerId],
+            solvedTotal: 1,
+            firstTryTotal: 1,
+            seenPuzzleIds: [puzzle.id],
+          },
+        },
+      },
+    };
+    const res = await request(makeApp()).get("/api/game-state").query(CREDS);
+    const mb = res.body.data.mysteryBird;
+    expect(mb.status).toBe("solved");
+    expect(mb.guessesLeft).toBe(0);
+    expect(mb.answerId).toBe(puzzle.answerId);
+    expect(mb.solvedTotal).toBe(1);
+  });
+
+  test("POST /mystery/guess counts solves from other scenes toward badges", async () => {
+    const { collection } = require("../data/collections/northAmericanWinterBirds");
+    const puzzle = require("../data/collections/mysteryBirdPuzzles/northAmericanWinterBirds").puzzles[0];
+    const todayKey = require("../utils/mysteryBird/pickTodayPuzzle").etDayKey();
+    topiaMock.visitorSeed = {
+      "world-scene-1": {
+        spotCooldowns: {},
+        mysteryBird: {
+          [collection.id]: { todayKey, puzzleId: puzzle.id, guessedIds: [], solvedTotal: 0, firstTryTotal: 0, seenPuzzleIds: [puzzle.id] },
+        },
+      },
+      "other-world-scene-9": {
+        spotCooldowns: {},
+        mysteryBird: {
+          [collection.id]: { todayKey, puzzleId: puzzle.id, guessedIds: [], solvedTotal: 4, firstTryTotal: 0, seenPuzzleIds: [] },
+        },
+      },
+    };
+    const res = await request(makeApp())
+      .post("/api/mystery/guess")
+      .query(CREDS)
+      .send({ collectionId: collection.id, pickedBirdId: puzzle.answerId });
+    expect(res.status).toBe(200);
+    expect(res.body.data.mysteryBird.solvedTotal).toBe(5);
+  });
+
   test("POST /mystery/guess wrong guess keeps the answer hidden and can't be repeated", async () => {
     const { collection } = require("../data/collections/northAmericanWinterBirds");
     const puzzles = require("../data/collections/mysteryBirdPuzzles/northAmericanWinterBirds").puzzles;

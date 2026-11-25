@@ -98,6 +98,10 @@ export const handleGetGameState = async (req: Request, res: Response) => {
 
     const badgeCatalog = await getEcosystemBadges(credentials).catch(() => ({}));
 
+    // Snapshot before any write: the SDK's updateDataObject replaces `visitor.dataObject`
+    // with the partial payload it sent, so reads after a write would see an empty object.
+    const visitorData = (visitor.dataObject || {}) as Record<string, unknown>;
+
     // Toast badges granted since the last open (queued by `awardBadges`), then clear the
     // queue. Fire-and-forget: a failed toast must not block the queue clear or the response.
     // The same write logs `appOpens`, except for in-app refreshes (`?refresh=true`).
@@ -118,7 +122,7 @@ export const handleGetGameState = async (req: Request, res: Response) => {
     const today = collectionData?.puzzles?.length
       ? resolveTodayMystery({
           puzzles: collectionData.puzzles,
-          stored: (visitor.dataObject?.[key] as VisitorPerScene | undefined)?.mysteryBird?.[collectionId],
+          stored: (visitorData[key] as VisitorPerScene | undefined)?.mysteryBird?.[collectionId],
           todayKey: etDayKey(),
           seed: `${profileId}:${key}:${collectionId}`,
         })
@@ -127,7 +131,7 @@ export const handleGetGameState = async (req: Request, res: Response) => {
       ? toMysteryView({
           ...today,
           profileId,
-          solvedTotal: sumMysteryTotals(visitor.dataObject).solvedTotal,
+          solvedTotal: sumMysteryTotals(visitorData).solvedTotal,
         })
       : undefined;
 
