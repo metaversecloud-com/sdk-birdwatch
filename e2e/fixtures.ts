@@ -329,7 +329,8 @@ export class TopiaWorld {
             username: "e2e-player",
             landmarkZonesString: inZone ? Object.keys(assets).join(",") : "",
             privateZoneId: "",
-            dataObject: visitorData,
+            // A returning player: the How to Play modal would cover the app. Seed false to test it.
+            dataObject: { hasSeenInstructions: true, ...visitorData },
             inventory: badges.map(ownedBadge),
             ownedItems: inventory,
             ...visitor,

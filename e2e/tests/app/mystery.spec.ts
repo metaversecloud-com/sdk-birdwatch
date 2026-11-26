@@ -97,7 +97,6 @@ test("a second wrong guess ends the day and only then reveals the answer", async
 });
 
 test("reopening Birdwatch after solving shows today's Mystery Bird as solved", async ({ page, world }) => {
-  test.fail(true, "EXP-436: /game-state reads the visitor data object after updateDataObject replaced it, so saved Mystery Bird state is ignored");
   await world.seed({ visitorData: mysteryData(world, today([PUZZLE_1.answerId], { solvedTotal: 3, firstTryTotal: 1 })) });
   await world.open(page, "key");
 
@@ -140,7 +139,6 @@ test.describe("guesses the server rejects", () => {
 });
 
 test("Mystery Bird solves in other Birdwatch scenes count toward Sharp Eye", async ({ page, world }) => {
-  test.fail(true, "EXP-436: handleMysteryGuess sums totals from visitor.dataObject after updateDataObject replaced it");
   // Four solves in another scene, none yet in this one: the fifth solve earns Sharp Eye.
   const otherScene = { ...today([PUZZLE_1.answerId], { solvedTotal: 4, firstTryTotal: 4 }) };
   await world.seed({
