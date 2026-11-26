@@ -59,7 +59,6 @@ test.describe("first touch", () => {
   });
 
   test("the World Bird Count shows the Collection's totals on the first open in a new scene", async ({ page, world }) => {
-    test.fail(true, "EXP-436: /game-state reads the world data object after updateDataObject replaced it with the sceneDropId patch");
     // The Collection was last opened from another scene (or the scene was re-placed).
     await world.seed({
       worldData: placedWorld({
@@ -74,7 +73,6 @@ test.describe("first touch", () => {
   });
 
   test("the first open in a new scene keeps the admin's identification mode", async ({ page, world }) => {
-    test.fail(true, "EXP-436: /game-state reads the world data object after updateDataObject replaced it with the sceneDropId patch");
     await world.seed({ worldData: placedWorld({ adminSettings: { identificationMode: "picture_match" }, collection: { sceneDropId: "old-scene" } }) });
 
     const { data } = await (await page.request.get(world.api("/game-state", world.at("feeder")))).json();
