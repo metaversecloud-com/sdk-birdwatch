@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 
 // components
 import { PageContainer } from "@/components";
-import { LeaderboardTab, BadgesTab } from "@/components";
+import { LeaderboardTab, BadgesTab, HowToPlayModal } from "@/components";
 
 // context
 import { GlobalDispatchContext } from "@/context/GlobalContext";
@@ -67,6 +67,7 @@ export const TrophyDrawer = () => {
           </div>
         </div>
       )}
+      <HowToPlayModal />
     </PageContainer>
   );
 };

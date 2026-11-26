@@ -60,6 +60,20 @@ describe("Birdwatch routes", () => {
     expect(analyticNames()).not.toContain("appOpens");
   });
 
+  test("GET /game-state shows instructions only on the first open, from any drawer", async () => {
+    const spotCreds = { ...CREDS, assetId: "asset-spot-feeder", uniqueName: "Birdwatch_spot" };
+    const first = await request(makeApp()).get("/api/game-state").query(spotCreds);
+    expect(first.body.data.showInstructions).toBe(true);
+    expect(topiaMock.analyticsLog.map((a: any) => a.analyticName)).toContain("appOpens");
+
+    const refresh = await request(makeApp()).get("/api/game-state").query({ ...CREDS, refresh: "true" });
+    expect(refresh.body.data.showInstructions).toBe(false);
+
+    topiaMock.visitorSeed = { hasSeenInstructions: true };
+    const second = await request(makeApp()).get("/api/game-state").query(CREDS);
+    expect(second.body.data.showInstructions).toBe(false);
+  });
+
   test("POST /analytics logs client analytics and rejects unknown names", async () => {
     for (const name of ["fieldGuideOpens", "fieldGuidePageViews", "externalLinkClicks"]) {
       const res = await request(makeApp()).post("/api/analytics").query(CREDS).send({ analyticName: name });

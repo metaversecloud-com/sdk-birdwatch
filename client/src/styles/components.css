@@ -590,6 +590,15 @@ body {
   background: var(--bw-sky);
   color: var(--bw-ink);
 }
+.bw-howto {
+  padding-top: 2.5rem;
+}
+.bw-howto__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--bw-radius-lg);
+}
 
 @keyframes bw-fade-in {
   from {

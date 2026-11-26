@@ -188,4 +188,6 @@ export interface GameStateResponse {
   leaderboard: Record<string, LeaderboardEntryString>;
   /** Today's Mystery Bird for this Collection, when it has puzzles. */
   mysteryBird?: MysteryBirdView;
+  /** True on the player's first open of Birdwatch in this world (from any drawer). */
+  showInstructions?: boolean;
 }

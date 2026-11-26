@@ -3,7 +3,14 @@ import { useSearchParams } from "react-router-dom";
 
 // components
 import { PageContainer } from "@/components";
-import { WorldBirdCountTab, FieldGuideTab, BirdPage, AdminSettingsPanel, MysteryBirdTab } from "@/components";
+import {
+  WorldBirdCountTab,
+  FieldGuideTab,
+  BirdPage,
+  AdminSettingsPanel,
+  MysteryBirdTab,
+  HowToPlayModal,
+} from "@/components";
 
 // context
 import { GlobalDispatchContext, GlobalStateContext } from "@/context/GlobalContext";
@@ -86,6 +93,7 @@ export const Home = () => {
       {tab === "fg" && <FieldGuideTab onOpenBird={openBirdPage} />}
       {tab === "mb" && <MysteryBirdTab />}
       {openBird && <BirdPage bird={openBird} onClose={() => setOpenBird(null)} />}
+      <HowToPlayModal />
     </PageContainer>
   );
 };

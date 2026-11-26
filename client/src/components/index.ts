@@ -12,6 +12,7 @@ export { WorldBirdCountTab } from "./WorldBirdCountTab";
 export { FieldGuideTab } from "./FieldGuideTab";
 export { BirdProfile } from "./BirdProfile";
 export { BirdPage } from "./BirdPage";
+export { HowToPlayModal } from "./HowToPlayModal";
 export { LeaderboardTab } from "./LeaderboardTab";
 export { BadgesTab } from "./BadgesTab";
 export { AdminSettingsPanel } from "./AdminSettingsPanel";

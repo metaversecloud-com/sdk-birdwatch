@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 // components
 import { PageContainer } from "@/components";
-import { BirdSightingCard, BirdPage, CooldownScreen } from "@/components";
+import { BirdSightingCard, BirdPage, CooldownScreen, HowToPlayModal } from "@/components";
 import { ResultView } from "@/components/sightingResult";
 
 // context
@@ -100,6 +100,7 @@ export const SpotDrawer = () => {
       )}
       {phase === "idle" && !loading && <CooldownScreen onOpenFieldGuide={openFieldGuide} onReady={startSighting} />}
       {openBird && <BirdPage bird={openBird} onClose={() => setOpenBird(null)} />}
+      <HowToPlayModal />
     </PageContainer>
   );
 };

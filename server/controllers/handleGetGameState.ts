@@ -108,11 +108,22 @@ export const handleGetGameState = async (req: Request, res: Response) => {
     const pendingBadgeToasts = visitor.dataObject?.pendingBadgeToasts || [];
     for (const badgeName of pendingBadgeToasts) fireBadgeToast(visitor, badgeName);
     const isAppOpen = req.query.refresh !== "true";
+    // First open in this world, from any drawer (a spot may be clicked before the key asset).
+    // Marked seen in the same write as the badge-toast clear / appOpens log.
+    const showInstructions = isAppOpen && !visitorData.hasSeenInstructions;
     if (pendingBadgeToasts.length || isAppOpen) {
       await visitor
-        .updateDataObject(pendingBadgeToasts.length ? { pendingBadgeToasts: [] } : {}, {
-          analytics: isAppOpen ? [{ analyticName: "appOpens", uniqueKey: profileId, urlSlug: credentials.urlSlug }] : [],
-        })
+        .updateDataObject(
+          {
+            ...(pendingBadgeToasts.length ? { pendingBadgeToasts: [] } : {}),
+            ...(showInstructions ? { hasSeenInstructions: true } : {}),
+          },
+          {
+            analytics: isAppOpen
+              ? [{ analyticName: "appOpens", uniqueKey: profileId, urlSlug: credentials.urlSlug }]
+              : [],
+          },
+        )
         .catch(() => undefined);
     }
 
@@ -144,6 +155,7 @@ export const handleGetGameState = async (req: Request, res: Response) => {
       milestones,
       leaderboard,
       mysteryBird,
+      showInstructions,
     };
 
     return res.json({
