@@ -1,0 +1,422 @@
+[
+  {
+    "id": "item-black_capped_chickadee",
+    "name": "Black-capped Chickadee",
+    "type": "ITEM",
+    "status": "ACTIVE",
+    "description": "Black-capped Chickadee",
+    "image_path": "https://example.invalid/birds/black_capped_chickadee.png",
+    "metadata": {
+      "birdId": "black_capped_chickadee",
+      "collectionId": "north_american_winter_birds"
+    }
+  },
+  {
+    "id": "item-northern_cardinal",
+    "name": "Northern Cardinal",
+    "type": "ITEM",
+    "status": "ACTIVE",
+    "description": "Northern Cardinal",
+    "image_path": "https://example.invalid/birds/northern_cardinal.png",
+    "metadata": {
+      "birdId": "northern_cardinal",
+      "collectionId": "north_american_winter_birds"
+    }
+  },
+  {
+    "id": "item-house_finch",
+    "name": "House Finch",
+    "type": "ITEM",
+    "status": "ACTIVE",
+    "description": "House Finch",
+    "image_path": "https://example.invalid/birds/house_finch.png",
+    "metadata": {
+      "birdId": "house_finch",
+      "collectionId": "north_american_winter_birds"
+    }
+  },
+  {
+    "id": "item-tufted_titmouse",
+    "name": "Tufted Titmouse",
+    "type": "ITEM",
+    "status": "ACTIVE",
+    "description": "Tufted Titmouse",
+    "image_path": "https://example.invalid/birds/tufted_titmouse.png",
+    "metadata": {
+      "birdId": "tufted_titmouse",
+      "collectionId": "north_american_winter_birds"
+    }
+  },
+  {
+    "id": "item-red_bellied_woodpecker",
+    "name": "Red-bellied Woodpecker",
+    "type": "ITEM",
+    "status": "ACTIVE",
+    "description": "Red-bellied Woodpecker",
+    "image_path": "https://example.invalid/birds/red_bellied_woodpecker.png",
+    "metadata": {
+      "birdId": "red_bellied_woodpecker",
+      "collectionId": "north_american_winter_birds"
+    }
+  },
+  {
+    "id": "item-evening_grosbeak",
+    "name": "Evening Grosbeak",
+    "type": "ITEM",
+    "status": "ACTIVE",
+    "description": "Evening Grosbeak",
+    "image_path": "https://example.invalid/birds/evening_grosbeak.png",
+    "metadata": {
+      "birdId": "evening_grosbeak",
+      "collectionId": "north_american_winter_birds"
+    }
+  },
+  {
+    "id": "item-blue_jay",
+    "name": "Blue Jay",
+    "type": "ITEM",
+    "status": "ACTIVE",
+    "description": "Blue Jay",
+    "image_path": "https://example.invalid/birds/blue_jay.png",
+    "metadata": {
+      "birdId": "blue_jay",
+      "collectionId": "north_american_winter_birds"
+    }
+  },
+  {
+    "id": "item-dark_eyed_junco",
+    "name": "Dark-eyed Junco",
+    "type": "ITEM",
+    "status": "ACTIVE",
+    "description": "Dark-eyed Junco",
+    "image_path": "https://example.invalid/birds/dark_eyed_junco.png",
+    "metadata": {
+      "birdId": "dark_eyed_junco",
+      "collectionId": "north_american_winter_birds"
+    }
+  },
+  {
+    "id": "item-downy_woodpecker",
+    "name": "Downy Woodpecker",
+    "type": "ITEM",
+    "status": "ACTIVE",
+    "description": "Downy Woodpecker",
+    "image_path": "https://example.invalid/birds/downy_woodpecker.png",
+    "metadata": {
+      "birdId": "downy_woodpecker",
+      "collectionId": "north_american_winter_birds"
+    }
+  },
+  {
+    "id": "item-white_breasted_nuthatch",
+    "name": "White-breasted Nuthatch",
+    "type": "ITEM",
+    "status": "ACTIVE",
+    "description": "White-breasted Nuthatch",
+    "image_path": "https://example.invalid/birds/white_breasted_nuthatch.png",
+    "metadata": {
+      "birdId": "white_breasted_nuthatch",
+      "collectionId": "north_american_winter_birds"
+    }
+  },
+  {
+    "id": "item-pileated_woodpecker",
+    "name": "Pileated Woodpecker",
+    "type": "ITEM",
+    "status": "ACTIVE",
+    "description": "Pileated Woodpecker",
+    "image_path": "https://example.invalid/birds/pileated_woodpecker.png",
+    "metadata": {
+      "birdId": "pileated_woodpecker",
+      "collectionId": "north_american_winter_birds"
+    }
+  },
+  {
+    "id": "item-great_horned_owl",
+    "name": "Great Horned Owl",
+    "type": "ITEM",
+    "status": "ACTIVE",
+    "description": "Great Horned Owl",
+    "image_path": "https://example.invalid/birds/great_horned_owl.png",
+    "metadata": {
+      "birdId": "great_horned_owl",
+      "collectionId": "north_american_winter_birds"
+    }
+  },
+  {
+    "id": "item-mallard",
+    "name": "Mallard",
+    "type": "ITEM",
+    "status": "ACTIVE",
+    "description": "Mallard",
+    "image_path": "https://example.invalid/birds/mallard.png",
+    "metadata": {
+      "birdId": "mallard",
+      "collectionId": "north_american_winter_birds"
+    }
+  },
+  {
+    "id": "item-canada_goose",
+    "name": "Canada Goose",
+    "type": "ITEM",
+    "status": "ACTIVE",
+    "description": "Canada Goose",
+    "image_path": "https://example.invalid/birds/canada_goose.png",
+    "metadata": {
+      "birdId": "canada_goose",
+      "collectionId": "north_american_winter_birds"
+    }
+  },
+  {
+    "id": "item-hooded_merganser",
+    "name": "Hooded Merganser",
+    "type": "ITEM",
+    "status": "ACTIVE",
+    "description": "Hooded Merganser",
+    "image_path": "https://example.invalid/birds/hooded_merganser.png",
+    "metadata": {
+      "birdId": "hooded_merganser",
+      "collectionId": "north_american_winter_birds"
+    }
+  },
+  {
+    "id": "item-bald_eagle",
+    "name": "Bald Eagle",
+    "type": "ITEM",
+    "status": "ACTIVE",
+    "description": "Bald Eagle",
+    "image_path": "https://example.invalid/birds/bald_eagle.png",
+    "metadata": {
+      "birdId": "bald_eagle",
+      "collectionId": "north_american_winter_birds"
+    }
+  },
+  {
+    "id": "item-snowy_owl",
+    "name": "Snowy Owl",
+    "type": "ITEM",
+    "status": "ACTIVE",
+    "description": "Snowy Owl",
+    "image_path": "https://example.invalid/birds/snowy_owl.png",
+    "metadata": {
+      "birdId": "snowy_owl",
+      "collectionId": "north_american_winter_birds"
+    }
+  },
+  {
+    "id": "item-american_robin",
+    "name": "American Robin",
+    "type": "ITEM",
+    "status": "ACTIVE",
+    "description": "American Robin",
+    "image_path": "https://example.invalid/birds/american_robin.png",
+    "metadata": {
+      "birdId": "american_robin",
+      "collectionId": "north_american_winter_birds"
+    }
+  },
+  {
+    "id": "item-mourning_dove",
+    "name": "Mourning Dove",
+    "type": "ITEM",
+    "status": "ACTIVE",
+    "description": "Mourning Dove",
+    "image_path": "https://example.invalid/birds/mourning_dove.png",
+    "metadata": {
+      "birdId": "mourning_dove",
+      "collectionId": "north_american_winter_birds"
+    }
+  },
+  {
+    "id": "item-cedar_waxwing",
+    "name": "Cedar Waxwing",
+    "type": "ITEM",
+    "status": "ACTIVE",
+    "description": "Cedar Waxwing",
+    "image_path": "https://example.invalid/birds/cedar_waxwing.png",
+    "metadata": {
+      "birdId": "cedar_waxwing",
+      "collectionId": "north_american_winter_birds"
+    }
+  },
+  {
+    "id": "item-northern_mockingbird",
+    "name": "Northern Mockingbird",
+    "type": "ITEM",
+    "status": "ACTIVE",
+    "description": "Northern Mockingbird",
+    "image_path": "https://example.invalid/birds/northern_mockingbird.png",
+    "metadata": {
+      "birdId": "northern_mockingbird",
+      "collectionId": "north_american_winter_birds"
+    }
+  },
+  {
+    "id": "item-eastern_bluebird",
+    "name": "Eastern Bluebird",
+    "type": "ITEM",
+    "status": "ACTIVE",
+    "description": "Eastern Bluebird",
+    "image_path": "https://example.invalid/birds/eastern_bluebird.png",
+    "metadata": {
+      "birdId": "eastern_bluebird",
+      "collectionId": "north_american_winter_birds"
+    }
+  },
+  {
+    "id": "item-varied_thrush",
+    "name": "Varied Thrush",
+    "type": "ITEM",
+    "status": "ACTIVE",
+    "description": "Varied Thrush",
+    "image_path": "https://example.invalid/birds/varied_thrush.png",
+    "metadata": {
+      "birdId": "varied_thrush",
+      "collectionId": "north_american_winter_birds"
+    }
+  },
+  {
+    "id": "badge-1",
+    "name": "First Sighting",
+    "type": "BADGE",
+    "status": "ACTIVE",
+    "description": "First Sighting badge",
+    "image_path": "https://example.invalid/badges/1.png"
+  },
+  {
+    "id": "badge-2",
+    "name": "Avid Birder",
+    "type": "BADGE",
+    "status": "ACTIVE",
+    "description": "Avid Birder badge",
+    "image_path": "https://example.invalid/badges/2.png"
+  },
+  {
+    "id": "badge-3",
+    "name": "Rare Find",
+    "type": "BADGE",
+    "status": "ACTIVE",
+    "description": "Rare Find badge",
+    "image_path": "https://example.invalid/badges/3.png"
+  },
+  {
+    "id": "badge-4",
+    "name": "Legendary Birder",
+    "type": "BADGE",
+    "status": "ACTIVE",
+    "description": "Legendary Birder badge",
+    "image_path": "https://example.invalid/badges/4.png"
+  },
+  {
+    "id": "badge-5",
+    "name": "Bird Spotter",
+    "type": "BADGE",
+    "status": "ACTIVE",
+    "description": "Bird Spotter badge",
+    "image_path": "https://example.invalid/badges/5.png"
+  },
+  {
+    "id": "badge-6",
+    "name": "Keen Birder",
+    "type": "BADGE",
+    "status": "ACTIVE",
+    "description": "Keen Birder badge",
+    "image_path": "https://example.invalid/badges/6.png"
+  },
+  {
+    "id": "badge-7",
+    "name": "Expert Birder",
+    "type": "BADGE",
+    "status": "ACTIVE",
+    "description": "Expert Birder badge",
+    "image_path": "https://example.invalid/badges/7.png"
+  },
+  {
+    "id": "badge-8",
+    "name": "Mystery Solved",
+    "type": "BADGE",
+    "status": "ACTIVE",
+    "description": "Mystery Solved badge",
+    "image_path": "https://example.invalid/badges/8.png"
+  },
+  {
+    "id": "badge-9",
+    "name": "Sharp Eye",
+    "type": "BADGE",
+    "status": "ACTIVE",
+    "description": "Sharp Eye badge",
+    "image_path": "https://example.invalid/badges/9.png"
+  },
+  {
+    "id": "badge-10",
+    "name": "Bird Detective",
+    "type": "BADGE",
+    "status": "ACTIVE",
+    "description": "Bird Detective badge",
+    "image_path": "https://example.invalid/badges/10.png"
+  },
+  {
+    "id": "badge-11",
+    "name": "Mystery Master",
+    "type": "BADGE",
+    "status": "ACTIVE",
+    "description": "Mystery Master badge",
+    "image_path": "https://example.invalid/badges/11.png"
+  },
+  {
+    "id": "badge-12",
+    "name": "First Try",
+    "type": "BADGE",
+    "status": "ACTIVE",
+    "description": "First Try badge",
+    "image_path": "https://example.invalid/badges/12.png"
+  },
+  {
+    "id": "badge-13",
+    "name": "North American Winter Birds Complete",
+    "type": "BADGE",
+    "status": "ACTIVE",
+    "description": "North American Winter Birds Complete badge",
+    "image_path": "https://example.invalid/badges/13.png"
+  },
+  {
+    "id": "badge-14",
+    "name": "North American Winter Champion Birder",
+    "type": "BADGE",
+    "status": "ACTIVE",
+    "description": "North American Winter Champion Birder badge",
+    "image_path": "https://example.invalid/badges/14.png"
+  },
+  {
+    "id": "badge-15",
+    "name": "Winter Feeder Birds",
+    "type": "BADGE",
+    "status": "ACTIVE",
+    "description": "Winter Feeder Birds badge",
+    "image_path": "https://example.invalid/badges/15.png"
+  },
+  {
+    "id": "badge-16",
+    "name": "Winter Pine Woods Birds",
+    "type": "BADGE",
+    "status": "ACTIVE",
+    "description": "Winter Pine Woods Birds badge",
+    "image_path": "https://example.invalid/badges/16.png"
+  },
+  {
+    "id": "badge-17",
+    "name": "Winter Frozen Pond Birds",
+    "type": "BADGE",
+    "status": "ACTIVE",
+    "description": "Winter Frozen Pond Birds badge",
+    "image_path": "https://example.invalid/badges/17.png"
+  },
+  {
+    "id": "badge-18",
+    "name": "Winter Berry Bushes Birds",
+    "type": "BADGE",
+    "status": "ACTIVE",
+    "description": "Winter Berry Bushes Birds badge",
+    "image_path": "https://example.invalid/badges/18.png"
+  }
+]
